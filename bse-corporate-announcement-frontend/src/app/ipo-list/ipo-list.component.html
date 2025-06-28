@@ -1,0 +1,32 @@
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+      <h2>IPO's Open</h2>
+    </div>
+
+
+    
+    <table class="table table-striped table-bordered">
+      <thead class="table-dark">
+        <tr>
+          <th>Company Name</th>
+          <th>Issue Size</th>
+          <th>IPO Open Date</th>
+          <th>IPO Closed Date</th>
+          <th>Category</th>
+          <th>Open</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let ipo of ipos" [ngClass]="{ 'table-success': ipo.isOpen }">
+          <td>{{ ipo.companyShortName }}</td>
+          <td>{{ ipo.issueSize !== null ? ipo.issueSize : 'N/A' }}</td>
+          <td>{{ ipo.ipoOpenDate || 'N/A' }}</td>
+          <td>{{ ipo.ipoClosedDate || 'N/A' }}</td>
+          <td>{{ ipo.ipoCategory}}</td>
+          <td>{{ ipo.isOpen ? '✅' : '❌' }}</td>
+          
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  

@@ -1,1 +1,37 @@
-<app-announcements></app-announcements>
+<header class="navbar navbar-expand-lg navbar-light bg-light px-4 py-2 shadow-sm">
+  <a class="navbar-brand fw-bold text-primary" href="#">
+    scan<span class="text-info" style="display:inline-block; transform:rotate(-30deg)">x</span>
+  </a>
+
+  <div class="collapse navbar-collapse justify-content-center">
+    <ul class="navbar-nav gap-3">
+      <li class="nav-item">
+        <a routerLink="/" routerLinkActive="active" class="nav-link">Home</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/live" routerLinkActive="active" class="nav-link">Live</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/news" routerLinkActive="active" class="nav-link">News</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/create" routerLinkActive="active" class="nav-link">Create</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/screeners" routerLinkActive="active" class="nav-link">Screeners</a>
+      </li>
+      <li class="nav-item">
+        <a routerLink="/insights" routerLinkActive="active" class="nav-link">Insights</a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary">Login</button>
+    <button class="btn btn-primary">Open Account</button>
+  </div>
+</header>
+
+<div class="container mt-4">
+  <app-ipo-list></app-ipo-list>
+</div>

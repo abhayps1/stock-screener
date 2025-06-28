@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-BseCorporateAnnouncementBackendApplication<bse-corporate-announcement-backend>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.bsecab.BseCorporateAnnouncementBackendApplication",
+            "projectName": "bse-corporate-announcement-backend",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}
