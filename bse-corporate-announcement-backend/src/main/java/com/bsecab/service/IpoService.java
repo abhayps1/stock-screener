@@ -36,32 +36,34 @@ public class IpoService {
 		List<IpoDTO> ipoDTOs = new ArrayList();
 		for (Object obj : ipoListArray) {
 			JSONObject companyData = (JSONObject) obj;
-			
-			LocalDate openDate = LocalDate.parse(companyData.getString("issue_open_dt"), formatter);
-    		LocalDate closeDate = LocalDate.parse(companyData.getString("issue_end_dt"), formatter);
-			
+
+			String openDtStr = companyData.optString("issue_open_dt", "");
+			String closeDtStr = companyData.optString("issue_end_dt", "");
+
+			LocalDate openDate = null;
+			LocalDate closeDate = null;
+
+			if (!openDtStr.isEmpty()) {
+				openDate = LocalDate.parse(openDtStr, formatter);
+			}
+			if (!closeDtStr.isEmpty()) {
+				closeDate = LocalDate.parse(closeDtStr, formatter);
+			}
+
 			LocalDate today = LocalDate.now();
-			boolean isOpen = !today.isBefore(openDate) && !today.isAfter(closeDate);
-			
-			// if(isOpen){
-			// 	IpoDTO ipoDTO = new IpoDTO();
-			// 	ipoDTO.setCompanyShortName(companyData.getString("company_short_name"));
-			// 	ipoDTO.setIssueSize(companyData.getString("issue_size"));
-			// 	ipoDTO.setIpoOpenDate(openDate);
-			// 	ipoDTO.setIpoClosedDate(closeDate);
-			// 	ipoDTO.setIpoCategory(companyData.getString("ipo_category"));
-			// 	ipoDTO.setIsOpen(isOpen);
-			// 	ipoDTOs.add(ipoDTO);
-			// }
+			boolean isOpen = false;
+			if (openDate != null && closeDate != null) {
+				isOpen = !today.isBefore(openDate) && !today.isAfter(closeDate);
+			}
 
 			IpoDTO ipoDTO = new IpoDTO();
-				ipoDTO.setCompanyShortName(companyData.getString("company_short_name"));
-				ipoDTO.setIssueSize(companyData.getString("issue_size"));
-				ipoDTO.setIpoOpenDate(openDate);
-				ipoDTO.setIpoClosedDate(closeDate);
-				ipoDTO.setIpoCategory(companyData.getString("ipo_category"));
-				ipoDTO.setIsOpen(isOpen);
-				ipoDTOs.add(ipoDTO);
+			ipoDTO.setCompanyShortName(companyData.getString("company_short_name"));
+			ipoDTO.setIssueSize(companyData.getString("issue_size"));
+			ipoDTO.setIpoOpenDate(openDate);
+			ipoDTO.setIpoClosedDate(closeDate);
+			ipoDTO.setIpoCategory(companyData.getString("ipo_category"));
+			ipoDTO.setIsOpen(isOpen);
+			ipoDTOs.add(ipoDTO);
 
 		}
 
