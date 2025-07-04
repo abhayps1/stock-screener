@@ -1,0 +1,63 @@
+<button class="btn btn-primary mb-3" (click)="showForm = true" *ngIf="!showForm">Add Stock</button>
+
+<form *ngIf="showForm" (ngSubmit)="addStock()" #stockForm="ngForm" class="mb-4 center-modal-form">
+    <div class="mb-2">
+        <label>Stock Name *</label>
+        <input type="text" class="form-control" required [(ngModel)]="newStock.stockName" name="stockName">
+    </div>
+    <div class="mb-2">
+        <label>Category</label>
+        <input type="text" class="form-control" [(ngModel)]="newStock.stockCategory" name="stockCategory">
+    </div>
+    <div class="mb-2">
+        <label>Groww URL</label>
+        <input type="text" class="form-control" [(ngModel)]="newStock.growwUrl" name="growwUrl">
+    </div>
+    <div class="mb-2">
+        <label>Screener URL</label>
+        <input type="text" class="form-control" [(ngModel)]="newStock.screenerUrl" name="screenerUrl">
+    </div>
+    <div class="mb-2">
+        <label>Trendlyne URL</label>
+        <input type="text" class="form-control" [(ngModel)]="newStock.trendlyneUrl" name="trendlyneUrl">
+    </div>
+    <button class="btn btn-success" type="submit" [disabled]="!newStock.stockName">Submit</button>
+    <button class="btn btn-secondary ms-2" type="button" (click)="showForm = false">Cancel</button>
+</form>
+
+<div *ngFor="let category of groupedStocks | keyvalue" class="mb-5">
+    <h4>{{ category.key }}</h4>
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let stock of category.value">
+                <td class="position-relative stock-hover-group">
+                    <div
+                        (mouseenter)="hoveredStock = stock"
+                        (mouseleave)="hoveredStock = null"
+                        style="display: inline-block; position: relative;"
+                    >
+                        <span class="stock-name-hover">
+                          {{ stock.stockName }}
+                        </span>
+                        <div class="stock-url-popup" *ngIf="hoveredStock === stock">
+                          <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">
+                            <img src="assets/images/icons/groww.svg" alt="Groww" width="28" height="28" />
+                          </a>
+                          <a *ngIf="stock.screenerUrl" [href]="stock.screenerUrl" target="_blank" title="Screener">
+                            <img src="assets/images/icons/screener.svg" alt="Screener" width="28" height="28" />
+                          </a>
+                          <a *ngIf="stock.trendlyneUrl" [href]="stock.trendlyneUrl" target="_blank" title="Trendlyne">
+                            <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="28" height="28" />
+                          </a>
+                        </div>
+                    </div>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

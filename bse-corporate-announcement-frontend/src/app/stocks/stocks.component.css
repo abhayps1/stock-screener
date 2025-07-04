@@ -1,0 +1,40 @@
+.stock-hover-group {
+  position: relative;
+}
+.stock-url-popup {
+  position: absolute;
+  left: 0;
+  bottom: 100%; /* Changed from top: 100% to bottom: 100% */
+  background: #fff;
+  border: 1px solid #ddd;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 0.5rem 1rem;
+  z-index: 10;
+  min-width: 120px;
+  white-space: nowrap;
+  margin-bottom: 6px; /* Optional: adds a small gap above the stock name */
+  display: flex;
+  gap: 16px; /* space between links */
+  align-items: center;
+}
+.stock-url-popup a {
+  margin-right: 18px;
+  text-decoration: none;
+  color: #007bff;
+  font-weight: 500;
+  padding: 2px 8px;
+  border-radius: 4px;
+  transition: background 0.2s;
+}
+
+.stock-url-popup a:last-child {
+  margin-right: 0;
+}
+
+.stock-url-popup a:hover {
+  background: #f0f0f0;
+}
+.stock-name-hover {
+  cursor: pointer;
+  text-decoration: underline dotted;
+}
