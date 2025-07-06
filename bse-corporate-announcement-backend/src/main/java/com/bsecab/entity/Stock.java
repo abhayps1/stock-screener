@@ -1,6 +1,5 @@
 package com.bsecab.entity;
 
-import java.math.BigDecimal;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,34 +13,15 @@ import lombok.Data;
 public class Stock {
 
 	@Id
-	@Column(length = 10)
-	private Long id;
+	@Column(name = "stock_name", nullable = false, unique = true)
+	private String stockName;
 
-	@Column(nullable = false)
-	private String name;
+	private String stockCategory;
 
-	@Column(precision = 10, scale = 2)
-	private BigDecimal currentPrice;
+	private String growwUrl;
 
-	@Column(precision = 10, scale = 2)
-	private BigDecimal week52High;
+	private String screenerUrl;
 
-	@Column(precision = 10, scale = 2)
-	private BigDecimal week52Low;
-
-	@Column(precision = 15, scale = 2)
-	private BigDecimal marketCap;
-
-//	@Column(precision = 15, scale = 2)
-//	private BigDecimal volume;
-
-	private Double peRatio;
-
-//	private Double dividendYield;
-
-	@Column(precision = 10, scale = 2)
-	private BigDecimal bookValue;
-
-//	private LocalDateTime lastUpdated;
+	private String trendlyneUrl;
 
 }
