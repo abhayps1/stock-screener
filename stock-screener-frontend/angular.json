@@ -3,7 +3,7 @@
   "version": 1,
   "newProjectRoot": "projects",
   "projects": {
-    "bse-corporate-announcement-frontend": {
+    "stock-screener-frontend": {
       "projectType": "application",
       "schematics": {},
       "root": "",
@@ -13,7 +13,7 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "outputPath": "dist/bse-corporate-announcement-frontend",
+            "outputPath": "dist/stock-screener-frontend",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": [
@@ -63,10 +63,10 @@
           "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
-              "browserTarget": "bse-corporate-announcement-frontend:build:production"
+              "browserTarget": "stock-screener-frontend:build:production"
             },
             "development": {
-              "browserTarget": "bse-corporate-announcement-frontend:build:development"
+              "browserTarget": "stock-screener-frontend:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -74,7 +74,7 @@
         "extract-i18n": {
           "builder": "@angular-devkit/build-angular:extract-i18n",
           "options": {
-            "browserTarget": "bse-corporate-announcement-frontend:build"
+            "browserTarget": "stock-screener-frontend:build"
           }
         },
         "test": {
