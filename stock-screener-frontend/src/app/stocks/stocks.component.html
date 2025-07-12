@@ -9,18 +9,6 @@
         <label>Category</label>
         <input type="text" class="form-control" [(ngModel)]="newStock.stockCategory" name="stockCategory">
     </div>
-    <div class="mb-2">
-        <label>Groww URL</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.growwUrl" name="growwUrl">
-    </div>
-    <div class="mb-2">
-        <label>Screener URL</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.screenerUrl" name="screenerUrl">
-    </div>
-    <div class="mb-2">
-        <label>Trendlyne URL</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.trendlyneUrl" name="trendlyneUrl">
-    </div>
     <button class="btn btn-success" type="submit" [disabled]="!newStock.stockName">Submit</button>
     <button class="btn btn-secondary ms-2" type="button" (click)="showForm = false">Cancel</button>
 </form>

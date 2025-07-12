@@ -7,9 +7,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-
+import com.aps.dto.AddStockRequest;
 import com.aps.entity.Stock;
 import com.aps.service.StockService;
 
@@ -32,11 +32,11 @@ public class StockController {
 	}
 
 	@PostMapping("/add")
-	public ResponseEntity<?> addStock(@RequestParam String stockName) {
-		if (stockName == null || stockName.trim().isEmpty()) {
+	public ResponseEntity<?> addStock(@RequestBody AddStockRequest request) {
+		if (request.getStockName() == null || request.getStockName().trim().isEmpty()) {
 			return ResponseEntity.badRequest().body("Stock name is mandatory.");
 		}
-		stockService.saveStock(stockName);
+		stockService.saveStock(request.getStockName(), request.getStockCategory());
 		return ResponseEntity.ok("Stock added successfully.");
 	}
 }

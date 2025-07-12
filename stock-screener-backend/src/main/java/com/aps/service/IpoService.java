@@ -33,7 +33,7 @@ public class IpoService {
 		JSONObject jsonObject = new JSONObject(responseBody);
 		JSONArray ipoListArray = (JSONArray) jsonObject.get("ipoList");
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
-		List<IpoDTO> ipoDTOs = new ArrayList();
+		List<IpoDTO> ipoDTOs = new ArrayList<>();
 		for (Object obj : ipoListArray) {
 			JSONObject companyData = (JSONObject) obj;
 
