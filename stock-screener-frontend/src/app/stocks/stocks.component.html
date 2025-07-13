@@ -2,14 +2,14 @@
 
 <form *ngIf="showForm" (ngSubmit)="addStock()" #stockForm="ngForm" class="mb-4 center-modal-form">
     <div class="mb-2">
-        <label>Stock Name *</label>
-        <input type="text" class="form-control" required [(ngModel)]="newStock.stockName" name="stockName">
+        <label>Symbol *</label>
+        <input type="text" class="form-control" required [(ngModel)]="newStock.symbol" name="stockName">
     </div>
     <div class="mb-2">
         <label>Category</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.stockCategory" name="stockCategory">
+        <input type="text" class="form-control" [(ngModel)]="newStock.category" name="stockCategory">
     </div>
-    <button class="btn btn-success" type="submit" [disabled]="!newStock.stockName">Submit</button>
+    <button class="btn btn-success" type="submit" [disabled]="!newStock.symbol">Submit</button>
     <button class="btn btn-secondary ms-2" type="button" (click)="showForm = false">Cancel</button>
 </form>
 
@@ -18,7 +18,7 @@
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
-                <th>Stock Name</th>
+                <th>Company Name</th>
             </tr>
         </thead>
         <tbody>
@@ -30,7 +30,7 @@
                         style="display: inline-block; position: relative;"
                     >
                         <span class="stock-name-hover">
-                          {{ stock.stockName }}
+                          {{ stock.companyName }}
                         </span>
                         <div class="stock-url-popup" *ngIf="hoveredStock === stock">
                           <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">

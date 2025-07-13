@@ -8,7 +8,7 @@ import { Stock } from '../models/stock.model';
 })
 export class StocksComponent implements OnInit {
   groupedStocks: { [category: string]: Stock[] } = {};
-  newStock: Stock = { stockName: '', stockCategory: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
+  newStock: Stock = {symbol : '', companyName: '', category: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
   showForm = false;
   hoveredStock: Stock | null = null;
 
@@ -21,7 +21,7 @@ export class StocksComponent implements OnInit {
   loadStocks() {
     this.stocksService.getStocks().subscribe(stocks => {
       this.groupedStocks = stocks.reduce((acc, stock) => {
-        const category = stock.stockCategory || 'Uncategorized';
+        const category = stock.category || 'Uncategorized';
         if (!acc[category]) {
           acc[category] = [];
         }
@@ -32,10 +32,14 @@ export class StocksComponent implements OnInit {
   }
 
   addStock() {
-    this.stocksService.addStock(this.newStock).subscribe(() => {
-      this.newStock = { stockName: '', stockCategory: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
-      this.showForm = false;
+    const payload = {
+      symbol: this.newStock.symbol,
+      category: this.newStock.category
+    };
+    this.stocksService.addStock(payload).subscribe(() => {
       this.loadStocks();
+      this.showForm = false;
+      this.newStock = { symbol: '', category: '' };
     });
   }
 }

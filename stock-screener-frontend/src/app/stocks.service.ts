@@ -16,7 +16,7 @@ export class StocksService {
     return this.http.get<Stock[]>(this.apiUrl);
   }
 
-  addStock(stock: Stock): Observable<any> {
-    return this.http.post(this.addUrl, stock);
+  addStock(payload: { symbol: string; category?: string }): Observable<any> {
+    return this.http.post(this.addUrl, payload);
   }
 }

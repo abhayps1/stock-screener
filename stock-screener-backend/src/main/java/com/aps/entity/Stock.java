@@ -12,10 +12,12 @@ import lombok.Data;
 public class Stock {
 
 	@Id
-	@Column(name = "stock_name", nullable = false, unique = true)
-	private String stockName;
+	@Column(nullable = false, unique = true)
+	private String symbol;
 
-	private String stockCategory;
+	private String companyName;
+
+	private String category;
 
 	private String growwUrl;
 

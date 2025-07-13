@@ -1,6 +1,7 @@
 export interface Stock {
-  stockName: string;
-  stockCategory?: string;
+  symbol: string;
+  companyName?: string;
+  category?: string;
   growwUrl?: string;
   screenerUrl?: string;
   trendlyneUrl?: string;

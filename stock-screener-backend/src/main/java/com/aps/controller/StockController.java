@@ -33,10 +33,10 @@ public class StockController {
 
 	@PostMapping("/add")
 	public ResponseEntity<?> addStock(@RequestBody AddStockRequest request) {
-		if (request.getStockName() == null || request.getStockName().trim().isEmpty()) {
+		if (request.getSymbol() == null || request.getSymbol().trim().isEmpty()) {
 			return ResponseEntity.badRequest().body("Stock name is mandatory.");
 		}
-		stockService.saveStock(request.getStockName(), request.getStockCategory());
+		stockService.saveStock(request.getSymbol(), request.getCategory());
 		return ResponseEntity.ok("Stock added successfully.");
 	}
 }

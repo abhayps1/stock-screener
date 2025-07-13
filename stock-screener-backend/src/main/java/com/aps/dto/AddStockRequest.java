@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class AddStockRequest {
-    private String stockName;
-    private String stockCategory;
+    private String symbol;
+    private String category;
     // getters and setters
 }
