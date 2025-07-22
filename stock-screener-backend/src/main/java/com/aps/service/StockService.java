@@ -6,6 +6,7 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import com.aps.entity.Stock;
@@ -26,12 +27,12 @@ public class StockService {
     private String cookieHeader = null; // Store cookies here
 
     private void generateCookies() {
-		System.out.println("Cookie header generation started");
+        System.out.println("Cookie header generation started");
         OkHttpClient client = new OkHttpClient();
         try {
             Request homepageRequest = new Request.Builder()
-                .url("https://www.nseindia.com/market-data/new-stock-exchange-listings-today")
-                .header("User-Agent", "Mozilla/5.0").header("Accept", "text/html").build();
+                    .url("https://www.nseindia.com/market-data/new-stock-exchange-listings-today")
+                    .header("User-Agent", "Mozilla/5.0").header("Accept", "text/html").build();
 
             Response homepageResponse = client.newCall(homepageRequest).execute();
             List<String> cookies = homepageResponse.headers("Set-Cookie");
@@ -63,9 +64,9 @@ public class StockService {
 
         try {
             Request apiRequest = new Request.Builder()
-                .url("https://www.nseindia.com/api/quote-equity?symbol=" + stockSymbol)
-                .header("User-Agent", "Mozilla/5.0").header("Accept", "application/json")
-                .header("Referer", "https://www.nseindia.com/").header("Cookie", cookieHeader).build();
+                    .url("https://www.nseindia.com/api/quote-equity?symbol=" + stockSymbol)
+                    .header("User-Agent", "Mozilla/5.0").header("Accept", "application/json")
+                    .header("Referer", "https://www.nseindia.com/").header("Cookie", cookieHeader).build();
 
             Response apiResponse = client.newCall(apiRequest).execute();
             logger.info("NSE API response code for {}: {}", stockSymbol, apiResponse.code());
@@ -82,10 +83,10 @@ public class StockService {
 
                         String growwUrl = "https://groww.in/stocks/" + companyShortName;
                         String trendlyneUrl = "https://trendlyne.com/equity/" + stockSymbol + "/" + companyShortName + "/";
-                        String screenerUrl = "https://www.screener.in/company/" + stockSymbol + "/consolidated/";
+                        String screenerUrl = "https://www.screener.in/company/" + stockSymbol + "/consolidated";
 
                         Stock stock = new Stock();
-						stock.setSymbol(stockSymbol);
+                        stock.setSymbol(stockSymbol);
                         stock.setCompanyName(companyName);
                         stock.setCategory(stockCategory);
                         stock.setGrowwUrl(growwUrl);

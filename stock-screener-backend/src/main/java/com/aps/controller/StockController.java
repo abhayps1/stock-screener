@@ -4,21 +4,26 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.aps.dto.AddStockRequest;
 import com.aps.entity.Stock;
+import com.aps.service.CompanyResultCalendarService;
 import com.aps.service.StockService;
 
-@Controller
+@RestController
 @RequestMapping("/api/stock")
 public class StockController {
 
 	@Autowired
 	private StockService stockService;
+
+	@Autowired
+	private CompanyResultCalendarService companyResultCalendar;
 
 	// Get all stocks
 	@GetMapping("/allStocks")
@@ -39,4 +44,13 @@ public class StockController {
 		stockService.saveStock(request.getSymbol(), request.getCategory());
 		return ResponseEntity.ok("Stock added successfully.");
 	}
+
+	@GetMapping("/calendar")
+	public void getMethodName() {
+		// This method is a placeholder for the calendar functionality.
+		// It can be used to trigger the fetching of company results.
+		System.out.println("Fetching company results from calendar...");
+		companyResultCalendar.fetchCompanyResults();
+	}
+	
 }
