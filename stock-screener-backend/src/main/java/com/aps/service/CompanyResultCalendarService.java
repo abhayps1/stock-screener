@@ -1,14 +1,18 @@
 package com.aps.service;
 
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.nio.file.StandardOpenOption;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.springframework.stereotype.Service;
+
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -19,7 +23,7 @@ public class CompanyResultCalendarService {
 
     private static final String GROWW_BASE_URL = "https://groww.in";
 
-    public void fetchCompanyResults() {
+    public JSONObject fetchCompanyResults() {
         // Implementation for fetching company results
         // This method will interact with the StockService to get stock data
         // and process it accordingly.
@@ -40,52 +44,77 @@ public class CompanyResultCalendarService {
             Response response = client.newCall(request).execute();
 
             // System.out.println("Response Code: " + response.code());
-            if (!response.isSuccessful()) {
-                System.out.println("Failed to fetch data: " + response.message());
-                return;
-            }
+            // if (!response.isSuccessful()) {
+            //     System.out.println("Failed to fetch data: " + response.message());
+            //     return;
+            // }
 
             String responseBody = response.body().string();
             // System.out.println("Response Body: " + responseBody);
 
-            // Write response body to a JSON file in the same directory
-            try {
-                String filePath = "src/main/java/com/aps/service/response.json";
-                Files.write(Paths.get(filePath), responseBody.getBytes(), StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-                System.out.println("Response saved to " + filePath);
-            } catch (Exception ex) {
-                System.out.println("Failed to write response to file: " + ex.getMessage());
-            }
-
             // Parse JSON and get announcementEvents
             JSONObject json = new JSONObject(responseBody);
 
-            // Loop through both arrays
-            String[] eventArrays = {"announcementEvents", "exdateEvents"};
-            for (String arrayName : eventArrays) {
-                if (!json.has(arrayName)) continue;
+
+            // Loop through only exdateEvents array for RESULTS type events
+            String arrayName = "exdateEvents";
+            if (json.has(arrayName)) {
                 JSONArray events = json.getJSONArray(arrayName);
-                for (int i = 0; i < events.length(); i++) {
+                for (int i = 0; i < 1; i++) {
                     JSONObject event = events.getJSONObject(i);
                     if ("RESULTS".equals(event.optString("type"))) {
                         String searchId = event.optString("searchId");
                         JSONObject pill = event.optJSONObject("corporateEventPillDto");
                         String primaryDate = pill != null ? pill.optString("primaryDate") : "";
                         // System.out.println("searchId: " + searchId + ", primaryDate: " + primaryDate);
-
-                        String growwUrl = "https://groww.in/stocks/" + searchId;
+                        
+                        getFinancialStatement(searchId);
                     }
                 }
             }
+            return json;
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
-    private void getStockData(String url) {
-        // This method can be used to fetch stock data based on the searchId
-        // and process it further as needed.
-        System.out.println("Fetching stock data for searchId: " + searchId);
-        // Implement the logic to fetch and process stock data here.
+    public void getFinancialStatement(String searchId) {
+        String growwUrl = GROWW_BASE_URL+"/stocks/"+searchId;
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder().url(growwUrl).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseData = response.body().string();
+
+                // Parse HTML and extract JSON from __NEXT_DATA__ script tag
+                Document doc = Jsoup.parse(responseData);
+                Element nextDataScript = doc.getElementById("__NEXT_DATA__");
+                if (nextDataScript != null) {
+                    String jsonData = nextDataScript.html();
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode root = mapper.readTree(jsonData);
+                    JsonNode financialStatement = root
+                        .path("props")
+                        .path("pageProps")
+                        .path("stockData")
+                        .path("financialStatement");
+
+                    if (financialStatement.isMissingNode()) {
+                        System.out.println("financialStatement not found.");
+                    } else {
+                        System.out.println(financialStatement.toPrettyString());
+                    }
+                } else {
+                    System.out.println("__NEXT_DATA__ script tag not found.");
+                }
+            } else {
+                System.out.println("Request failed: " + response.code());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }

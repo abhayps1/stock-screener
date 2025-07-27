@@ -2,6 +2,7 @@ package com.aps.controller;
 
 import java.util.List;
 
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -46,11 +47,12 @@ public class StockController {
 	}
 
 	@GetMapping("/calendar")
-	public void getMethodName() {
+	public JSONObject getMethodName() {
 		// This method is a placeholder for the calendar functionality.
 		// It can be used to trigger the fetching of company results.
 		System.out.println("Fetching company results from calendar...");
-		companyResultCalendar.fetchCompanyResults();
+		JSONObject json = companyResultCalendar.fetchCompanyResults();
+		return json;
 	}
 	
 }
