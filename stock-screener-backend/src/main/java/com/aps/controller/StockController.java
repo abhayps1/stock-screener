@@ -16,6 +16,7 @@ import com.aps.entity.Stock;
 import com.aps.service.CompanyResultCalendarService;
 import com.aps.service.StockService;
 
+
 @RestController
 @RequestMapping("/api/stock")
 public class StockController {
@@ -54,5 +55,15 @@ public class StockController {
 		JSONObject json = companyResultCalendar.fetchCompanyResults();
 		return json;
 	}
-	
+
+	@GetMapping("/rsi-mfi")
+	public ResponseEntity<String> getRsiAndMfiData() {
+		try {
+			String result = stockService.getIndicatorsData();
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			return ResponseEntity.status(500).body("Error fetching RSI and MFI data: " + e.getMessage());
+		}
+	}
+
 }

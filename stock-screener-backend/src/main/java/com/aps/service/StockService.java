@@ -1,8 +1,14 @@
 package com.aps.service;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONObject;
+import org.jsoup.Jsoup;
+import org.jsoup.nodes.Document;
+import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +25,22 @@ import okhttp3.Response;
 public class StockService {
 
     private static final Logger logger = LoggerFactory.getLogger(StockService.class);
+
+    Map<String, Double> indicators = new HashMap<>();
+    // service class constructor
+    public StockService() {
+        // Initialize with keys and null/default values
+        indicators.put("Day RSI", null);
+        indicators.put("Day MACD", null);
+        indicators.put("Day MFI", null);
+        indicators.put("Day MACD Signal Line", null);
+        indicators.put("Day ADX", null);
+        indicators.put("Day ATR", null);
+        indicators.put("Day Commodity Channel Index", null);
+        indicators.put("Day ROC125", null);
+        indicators.put("Day ROC21", null);
+        indicators.put("William", null);
+    }
 
     @Autowired
     private StockRepository stockRepository;
@@ -81,7 +103,8 @@ public class StockService {
                         String companyShortName = slugify(companyName);
 
                         String growwUrl = "https://groww.in/stocks/" + companyShortName;
-                        String trendlyneUrl = "https://trendlyne.com/equity/" + stockSymbol + "/" + companyShortName + "/";
+                        String trendlyneUrl = "https://trendlyne.com/equity/" + stockSymbol + "/" + companyShortName
+                                + "/";
                         String screenerUrl = "https://www.screener.in/company/" + stockSymbol + "/consolidated";
 
                         Stock stock = new Stock();
@@ -121,4 +144,64 @@ public class StockService {
         String processed = input.toLowerCase().replaceAll("limited", "ltd");
         return processed.replaceAll("[^a-z0-9]+", "-").replaceAll("-$", "").replaceAll("^-", "");
     }
+
+    public String getIndicatorsData() {
+        String trendlyneURL = "https://trendlyne.com/equity/SHILCTECH/shilchar-technologies-ltd/";
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder().url(trendlyneURL).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseData = response.body().string();
+
+                // Parse HTML and extract data-myid
+                Document doc = Jsoup.parse(responseData);
+                Element infoCard = doc.selectFirst("div.stock_info_card.LpriceTop");
+                if (infoCard != null) {
+                    String myId = infoCard.attr("data-myid");
+                    String lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/" + myId + "/";
+
+                    Request lazyLoadRequest = new Request.Builder().url(lazyLoadUrl).get().build();
+
+                    try (Response lazyLoadResponse = client.newCall(lazyLoadRequest).execute()) {
+                        if (response.isSuccessful() && response.body() != null) {
+                            String html = lazyLoadResponse.body().string();
+                            Document document = org.jsoup.Jsoup.parse(html);
+                            
+                            String rsi = extractIndicatorUsingIndicatorName(document, "Day ");
+                            return "RSI: " + rsi + ", MFI: " + mfi;
+                        } else {
+                            return "Failed to fetch data: " + response.code();
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        return "Exception occurred: " + e.getMessage();
+                    }
+
+                } else {
+                    return "stock_info_card LpriceTop div not found.";
+                }
+            } else {
+                return "Request failed: " + response.code();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return "Exception occurred: " + e.getMessage();
+        }
+
+    }
+    
+    public String extractIndicatorUsingIndicatorName(Document document, String indicator ){
+
+        String regex = ":matchesOwn(^"+indicator+"$)";
+        Element current = document.selectFirst(regex);
+        if (current != null) {
+            // Get the next sibling element
+            Element next = current.nextElementSibling();
+            return next.text();
+        }
+        return indicator+" data is not found";
+    }
+
 }
