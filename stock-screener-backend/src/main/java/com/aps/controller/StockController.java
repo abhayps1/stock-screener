@@ -1,6 +1,7 @@
 package com.aps.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,13 +58,11 @@ public class StockController {
 	}
 
 	@GetMapping("/rsi-mfi")
-	public ResponseEntity<String> getRsiAndMfiData() {
-		try {
-			String result = stockService.getIndicatorsData();
+	public ResponseEntity<Map<String, String>> getRsiAndMfiData() {
+			Map<String, String> result = stockService.getIndicatorsData();
+			if(result.containsKey("error"))
+				return ResponseEntity.status(500).body(result);
 			return ResponseEntity.ok(result);
-		} catch (Exception e) {
-			return ResponseEntity.status(500).body("Error fetching RSI and MFI data: " + e.getMessage());
-		}
 	}
 
 }

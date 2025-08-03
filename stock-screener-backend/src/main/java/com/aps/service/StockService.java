@@ -1,6 +1,7 @@
 package com.aps.service;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,22 +26,6 @@ import okhttp3.Response;
 public class StockService {
 
     private static final Logger logger = LoggerFactory.getLogger(StockService.class);
-
-    Map<String, Double> indicators = new HashMap<>();
-    // service class constructor
-    public StockService() {
-        // Initialize with keys and null/default values
-        indicators.put("Day RSI", null);
-        indicators.put("Day MACD", null);
-        indicators.put("Day MFI", null);
-        indicators.put("Day MACD Signal Line", null);
-        indicators.put("Day ADX", null);
-        indicators.put("Day ATR", null);
-        indicators.put("Day Commodity Channel Index", null);
-        indicators.put("Day ROC125", null);
-        indicators.put("Day ROC21", null);
-        indicators.put("William", null);
-    }
 
     @Autowired
     private StockRepository stockRepository;
@@ -145,7 +130,9 @@ public class StockService {
         return processed.replaceAll("[^a-z0-9]+", "-").replaceAll("-$", "").replaceAll("^-", "");
     }
 
-    public String getIndicatorsData() {
+    public Map<String, String> getIndicatorsData() {
+
+        Map<String, String> indicatorsMap = new HashMap<>();
         String trendlyneURL = "https://trendlyne.com/equity/SHILCTECH/shilchar-technologies-ltd/";
         OkHttpClient client = new OkHttpClient();
 
@@ -165,43 +152,64 @@ public class StockService {
                     Request lazyLoadRequest = new Request.Builder().url(lazyLoadUrl).get().build();
 
                     try (Response lazyLoadResponse = client.newCall(lazyLoadRequest).execute()) {
-                        if (response.isSuccessful() && response.body() != null) {
+                        if (lazyLoadResponse.isSuccessful() && lazyLoadResponse.body() != null) {
                             String html = lazyLoadResponse.body().string();
                             Document document = org.jsoup.Jsoup.parse(html);
-                            
-                            String rsi = extractIndicatorUsingIndicatorName(document, "Day ");
-                            return "RSI: " + rsi + ", MFI: " + mfi;
+
+                            List<String> indicators = Arrays.asList(
+                                    "Day RSI",
+                                    "Day MACD",
+                                    "Day MFI",
+                                    "Day MACD Signal Line",
+                                    "Day ADX",
+                                    "Day ATR",
+                                    "Day Commodity Channel Index",
+                                    "Day ROC125",
+                                    "Day ROC21",
+                                    "William");
+
+                            for (String indicator : indicators) {
+                                indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(document, indicator));
+                            }
+                            System.out.println(indicatorsMap);
+
+                            return indicatorsMap;
                         } else {
-                            return "Failed to fetch data: " + response.code();
+                            indicatorsMap.put("error", "Failed to fetch data: " + lazyLoadResponse.code());
+                            return indicatorsMap;
                         }
                     } catch (IOException e) {
                         e.printStackTrace();
-                        return "Exception occurred: " + e.getMessage();
+                        indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
+                        return indicatorsMap;
                     }
 
                 } else {
-                    return "stock_info_card LpriceTop div not found.";
+                    indicatorsMap.put("error", "Unable to get the stock index in trendlyne.");
+                    return indicatorsMap;
                 }
             } else {
-                return "Request failed: " + response.code();
+                indicatorsMap.put("error", "Request failed: " + response.code());
+                return indicatorsMap;
             }
         } catch (IOException e) {
             e.printStackTrace();
-            return "Exception occurred: " + e.getMessage();
+            indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
+            return indicatorsMap;
         }
 
     }
-    
-    public String extractIndicatorUsingIndicatorName(Document document, String indicator ){
 
-        String regex = ":matchesOwn(^"+indicator+"$)";
+    public String extractIndicatorUsingIndicatorName(Document document, String indicator) {
+
+        String regex = ":matchesOwn(^" + indicator + "$)";
         Element current = document.selectFirst(regex);
         if (current != null) {
             // Get the next sibling element
             Element next = current.nextElementSibling();
             return next.text();
         }
-        return indicator+" data is not found";
+        return indicator + " data is not found";
     }
 
 }
