@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aps.dto.AddStockRequest;
@@ -31,6 +32,27 @@ public class StockController {
 
 	@Autowired
 	private CompanyResultCalendarService companyResultCalendar;
+
+
+	//searchStockData
+	@GetMapping("/search")
+	public ResponseEntity<?> seachStock(@RequestParam String stockName) {
+		logger.info("Searching for stock: {}", stockName);
+		
+		if (stockName == null || stockName.trim().isEmpty()) {
+			logger.warn("Stock name is null or empty");
+			return ResponseEntity.badRequest().body("Stock name is mandatory.");
+		}
+		
+		try {
+			String result = stockService.searchStock(stockName);
+			logger.info("Successfully searched for stock: {}", stockName);
+			return ResponseEntity.ok(result);
+		} catch (Exception e) {
+			logger.error("Error occurred while searching for stock {}: {}", stockName, e.getMessage(), e);
+			return ResponseEntity.status(500).body("Internal server error occurred while searching for stock");
+		}
+	}
 
 	// Get all stocks
 	@GetMapping("/allStocks")

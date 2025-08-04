@@ -1,17 +1,16 @@
-<button class="btn btn-primary mb-3" (click)="showForm = true" *ngIf="!showForm">Add Stock</button>
-
-<form *ngIf="showForm" (ngSubmit)="addStock()" #stockForm="ngForm" class="mb-4 center-modal-form">
+<div class="mb-4 center-modal-form">
     <div class="mb-2">
-        <label>Symbol *</label>
-        <input type="text" class="form-control" required [(ngModel)]="newStock.symbol" name="stockName">
+        <input 
+            type="text" 
+            class="form-control" 
+            [(ngModel)]="newStock.symbol" 
+            name="stockSymbol"
+            (input)="onSymbolInput($event)"
+            placeholder="Enter stock symbol* (e.g., RELIANCE, TCS)"
+            autocomplete="off">
+        <small class="text-muted">Stock will be added automatically after 1 second of no typing</small>
     </div>
-    <div class="mb-2">
-        <label>Category</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.category" name="stockCategory">
-    </div>
-    <button class="btn btn-success" type="submit" [disabled]="!newStock.symbol">Submit</button>
-    <button class="btn btn-secondary ms-2" type="button" (click)="showForm = false">Cancel</button>
-</form>
+</div>
 
 <div *ngFor="let category of groupedStocks | keyvalue" class="mb-5">
     <h4>{{ category.key }}</h4>
