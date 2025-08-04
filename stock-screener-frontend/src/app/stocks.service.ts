@@ -7,13 +7,14 @@ import { Stock } from './models/stock.model';
   providedIn: 'root'
 })
 export class StocksService {
-  private apiUrl = 'http://localhost:8080/api/stock/allStocks';
-  private addUrl = 'http://localhost:8080/api/stock/add';
+  private baseUrl = 'http://localhost:8080/api/stock';
+  private getAllStocksUrl = this.baseUrl+'/allStocks';
+  private addUrl = this.baseUrl+'/add';
 
   constructor(private http: HttpClient) { }
 
   getStocks(): Observable<Stock[]> {
-    return this.http.get<Stock[]>(this.apiUrl);
+    return this.http.get<Stock[]>(this.getAllStocksUrl);
   }
 
   addStock(payload: { symbol: string; category?: string }): Observable<any> {
