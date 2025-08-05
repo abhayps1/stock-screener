@@ -172,3 +172,21 @@ HikariPool-39 - Shutdown initiated...
 HikariPool-39 - Shutdown completed.
 Starting StockScreenerBackendApplication using Java 17.0.12 with PID 13700 (C:\Users\abhay\OneDrive\Desktop\stock-screener\stock-screener-backend\target\classes started by abhay in C:\Users\abhay\OneDrive\Desktop\stock-screener\stock-screener-backend)
 No active profile set, falling back to 1 default profile: "default"
+Starting service [Tomcat]
+Starting Servlet engine: [Apache Tomcat/10.1.42]
+Initializing Spring embedded WebApplicationContext
+HikariPool-40 - Starting...
+HikariPool-40 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2fd18fca
+HikariPool-40 - Start completed.
+HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+Configuring CORS mappings
+CORS configuration applied successfully
+Started StockScreenerBackendApplication in 0.689 seconds (process running for 4516.702)
+Initializing Spring DispatcherServlet 'dispatcherServlet'
+Searching for stock: infosys
+Searching for stock: infosys
+response body : 
+Successfully fetched data for stock: infosys
+Successfully searched for stock: infosys

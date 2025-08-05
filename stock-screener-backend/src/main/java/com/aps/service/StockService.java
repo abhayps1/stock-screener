@@ -18,6 +18,7 @@ import org.springframework.stereotype.Service;
 import com.aps.entity.Stock;
 import com.aps.repository.StockRepository;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -213,37 +214,42 @@ public class StockService {
     }
 
     public String searchStock(String stockName) {
-        logger.info("Searching for stock: {}", stockName);
-        
-        // Construct URL with parameters
-        String baseUrl = "https://api.bseindia.com/Msource/1D/getQouteSearch.aspx";
-        String url = baseUrl + "?Type=EQ&text=" + stockName + "&flag=site";
-        
         OkHttpClient client = new OkHttpClient();
+
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host("api.bseindia.com")
+                .addPathSegments("Msource/1D/getQouteSearch.aspx")
+                .addQueryParameter("Type", "EQ")
+                .addQueryParameter("text", stockName)
+                .addQueryParameter("flag", "site")
+                .build();
+
         Request request = new Request.Builder()
-            .url(url)
-            .header("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36")
-            .header("Referer", "https://www.bseindia.com/")
-            .header("Accept", "application/json, text/plain, */*")
-            .header("Accept-Language", "en-US,en;q=0.9")
-            .header("Accept-Encoding", "gzip, deflate, br")
-            .header("Connection", "keep-alive")
-            .build();
-        
+                .url(url)
+                .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                .addHeader("Referer", "https://www.bseindia.com/")
+                .addHeader("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
+                .addHeader("Accept", "application/json, text/plain, */*")
+                .addHeader("sec-ch-ua", "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"")
+                .addHeader("sec-ch-ua-mobile", "?0")
+                .build();
+
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
-                logger.info("response body : ", response.body());
-                String responseData = response.body().string();
-                logger.info("Successfully fetched data for stock: {}", stockName);
-                return responseData;
+                return "Response: " + response.body().string();
             } else {
-                logger.warn("Failed to fetch data for stock: {}. Status code: {}", stockName, response.code());
-                return "Error: Failed to fetch data. Status code: " + response.code();
+                return "Request failed: " + response.code();
             }
-        } catch (Exception e) {
-            logger.error("Error occurred while searching for stock {}: {}", stockName, e.getMessage(), e);
-            return "Error: " + e.getMessage();
         }
+       
+        catch (IOException e) {
+                    e.printStackTrace();
+                }
+
+
+        return "";
     }
 
 }
