@@ -1559,3 +1559,55 @@ Started StockScreenerBackendApplication in 0.568 seconds (process running for 12
 Initializing Spring DispatcherServlet 'dispatcherServlet'
 Searching for the term: infosys
 Search completed successfully for term: infosys
+Pausing ProtocolHandler ["http-nio-8080"]
+Stopping ProtocolHandler ["http-nio-8080"]
+HikariPool-55 - Shutdown initiated...
+HikariPool-55 - Shutdown completed.
+Starting StockScreenerBackendApplication using Java 17.0.12 with PID 12828 (C:\Users\abhay\OneDrive\Desktop\stock-screener\stock-screener-backend\target\classes started by abhay in C:\Users\abhay\OneDrive\Desktop\stock-screener)
+No active profile set, falling back to 1 default profile: "default"
+Initializing ProtocolHandler ["http-nio-8080"]
+Starting service [Tomcat]
+Starting Servlet engine: [Apache Tomcat/10.1.42]
+Initializing Spring embedded WebApplicationContext
+HikariPool-56 - Starting...
+HikariPool-56 - Added connection com.mysql.cj.jdbc.ConnectionImpl@1b6422aa
+HikariPool-56 - Start completed.
+HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+Configuring CORS mappings
+CORS configuration applied successfully
+Starting ProtocolHandler ["http-nio-8080"]
+Started StockScreenerBackendApplication in 0.592 seconds (process running for 12337.367)
+Pausing ProtocolHandler ["http-nio-8080"]
+Stopping ProtocolHandler ["http-nio-8080"]
+HikariPool-56 - Shutdown initiated...
+HikariPool-56 - Shutdown completed.
+Starting StockScreenerBackendApplication using Java 17.0.12 with PID 12828 (C:\Users\abhay\OneDrive\Desktop\stock-screener\stock-screener-backend\target\classes started by abhay in C:\Users\abhay\OneDrive\Desktop\stock-screener)
+No active profile set, falling back to 1 default profile: "default"
+Initializing ProtocolHandler ["http-nio-8080"]
+Starting service [Tomcat]
+Starting Servlet engine: [Apache Tomcat/10.1.42]
+Initializing Spring embedded WebApplicationContext
+HikariPool-57 - Starting...
+HikariPool-57 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5d1c596f
+HikariPool-57 - Start completed.
+HHH90000025: MySQL8Dialect does not need to be specified explicitly using 'hibernate.dialect' (remove the property setting and it will be selected by default)
+HHH90000026: MySQL8Dialect has been deprecated; use org.hibernate.dialect.MySQLDialect instead
+spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning
+Configuring CORS mappings
+CORS configuration applied successfully
+Starting ProtocolHandler ["http-nio-8080"]
+Started StockScreenerBackendApplication in 0.604 seconds (process running for 12346.795)
+Initializing Spring DispatcherServlet 'dispatcherServlet'
+Fetching all stocks from database
+Fetched 3 stocks from the database.
+Successfully fetched 3 stocks
+Fetching all stocks from database
+Fetched 3 stocks from the database.
+Successfully fetched 3 stocks
+Fetching all stocks from database
+Fetched 3 stocks from the database.
+Successfully fetched 3 stocks
+Searching for the term: infosys
+Searching for the term: infosys

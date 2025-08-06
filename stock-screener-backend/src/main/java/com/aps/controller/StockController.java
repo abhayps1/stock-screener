@@ -45,8 +45,7 @@ public class StockController {
 		}
 		
 		String result = stockService.searchStock(companyTerm);
-		System.out.println(result);
-		logger.info("Search completed successfully for term: {}", companyTerm);
+		// logger.info("Search completed successfully for term: {}", companyTerm);
 		return ResponseEntity.ok(result);
 	}
 

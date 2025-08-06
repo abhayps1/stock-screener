@@ -54,13 +54,11 @@ export class StocksComponent implements OnInit, OnDestroy {
       next: (searchResults) => {
         // Handle search results here
         console.log(`Search API Response for "${companyTerm}":`, searchResults);
-        console.log(`Number of results found: ${searchResults.length}`);
         console.log(`Response type: ${typeof searchResults}`);
-        console.log(`Is array: ${Array.isArray(searchResults)}`);
+        console.log(`Response length: ${searchResults.length}`);
         
-        if (Array.isArray(searchResults) && searchResults.length > 0) {
-          console.log(`First result:`, searchResults[0]);
-        }
+        // Log first 200 characters to see the HTML structure
+        console.log(`First 200 characters:`, searchResults.substring(0, 200));
         
         // You can display search results or handle them as needed
         this.companyTerm = ''; // Clear the search input after search

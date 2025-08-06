@@ -22,7 +22,7 @@ export class StocksService {
     return this.http.post(this.addUrl, payload);
   }
 
-  searchStocks(companyTerm: string): Observable<Stock[]> {
-    return this.http.get<Stock[]>(`${this.searchUrl}?companyTerm=${encodeURIComponent(companyTerm)}`);
+  searchStocks(companyTerm: string): Observable<string> {
+    return this.http.get(`${this.searchUrl}?companyTerm=${encodeURIComponent(companyTerm)}`, { responseType: 'text' });
   }
 }
