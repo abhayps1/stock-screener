@@ -10,6 +10,7 @@ export class StocksService {
   private baseUrl = 'http://localhost:8080/api/stock';
   private getAllStocksUrl = this.baseUrl+'/allStocks';
   private addUrl = this.baseUrl+'/add';
+  private searchUrl = this.baseUrl+'/search'; // New search endpoint
 
   constructor(private http: HttpClient) { }
 
@@ -19,5 +20,9 @@ export class StocksService {
 
   addStock(payload: { symbol: string; category?: string }): Observable<any> {
     return this.http.post(this.addUrl, payload);
+  }
+
+  searchStocks(companyTerm: string): Observable<Stock[]> {
+    return this.http.get<Stock[]>(`${this.searchUrl}?companyTerm=${encodeURIComponent(companyTerm)}`);
   }
 }

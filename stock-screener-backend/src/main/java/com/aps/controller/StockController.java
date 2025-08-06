@@ -36,22 +36,18 @@ public class StockController {
 
 	//searchStockData
 	@GetMapping("/search")
-	public ResponseEntity<?> seachStock(@RequestParam String stockName) {
-		logger.info("Searching for stock: {}", stockName);
+	public ResponseEntity<String> searchStock(@RequestParam String companyTerm) {
+		logger.info("Searching for the term: {}", companyTerm);
 		
-		if (stockName == null || stockName.trim().isEmpty()) {
+		if (companyTerm == null || companyTerm.trim().isEmpty()) {
 			logger.warn("Stock name is null or empty");
 			return ResponseEntity.badRequest().body("Stock name is mandatory.");
 		}
 		
-		try {
-			String result = stockService.searchStock(stockName);
-			logger.info("Successfully searched for stock: {}", stockName);
-			return ResponseEntity.ok(result);
-		} catch (Exception e) {
-			logger.error("Error occurred while searching for stock {}: {}", stockName, e.getMessage(), e);
-			return ResponseEntity.status(500).body("Internal server error occurred while searching for stock");
-		}
+		String result = stockService.searchStock(companyTerm);
+		System.out.println(result);
+		logger.info("Search completed successfully for term: {}", companyTerm);
+		return ResponseEntity.ok(result);
 	}
 
 	// Get all stocks

@@ -213,7 +213,7 @@ public class StockService {
         return indicator + " data is not found";
     }
 
-    public String searchStock(String stockName) {
+    public String searchStock(String companyTerm) {
         OkHttpClient client = new OkHttpClient();
 
         HttpUrl url = new HttpUrl.Builder()
@@ -221,7 +221,7 @@ public class StockService {
                 .host("api.bseindia.com")
                 .addPathSegments("Msource/1D/getQouteSearch.aspx")
                 .addQueryParameter("Type", "EQ")
-                .addQueryParameter("text", stockName)
+                .addQueryParameter("text", companyTerm)
                 .addQueryParameter("flag", "site")
                 .build();
 
@@ -236,20 +236,15 @@ public class StockService {
                 .addHeader("sec-ch-ua-mobile", "?0")
                 .build();
 
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                return "Response: " + response.body().string();
-            } else {
-                return "Request failed: " + response.code();
-            }
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (IOException e) {
+            
+            return "<h6>Request failed</h6>";
         }
-       
-        catch (IOException e) {
-                    e.printStackTrace();
-                }
-
-
-        return "";
+          
     }
 
 }

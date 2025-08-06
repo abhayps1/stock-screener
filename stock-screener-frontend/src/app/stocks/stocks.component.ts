@@ -10,6 +10,7 @@ import { Subject, debounceTime, takeUntil } from 'rxjs';
 export class StocksComponent implements OnInit, OnDestroy {
   groupedStocks: { [category: string]: Stock[] } = {};
   newStock: Stock = {symbol : '', companyName: '', category: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
+  companyTerm: string = ''; // New search variable
   showForm = false;
   hoveredStock: Stock | null = null;
   private destroy$ = new Subject<void>();
@@ -33,32 +34,45 @@ export class StocksComponent implements OnInit, OnDestroy {
         debounceTime(1000), // 1 second delay
         takeUntil(this.destroy$)
       )
-      .subscribe(symbol => {
-        if (symbol && symbol.trim()) {
-          this.autoAddStock(symbol.trim());
+      .subscribe(companyTerm => {
+        if (companyTerm && companyTerm.trim()) {
+          this.searchStocks(companyTerm.trim());
         }
       });
   }
 
   onSymbolInput(event: any): void {
-    const symbol = event.target.value;
-    this.inputSubject.next(symbol);
+    const companyTerm = event.target.value;
+    this.companyTerm = companyTerm; // Store in companyTerm instead of newStock.symbol
+    this.inputSubject.next(companyTerm);
   }
 
-  private autoAddStock(symbol: string): void {
-    const payload = {
-      symbol: symbol,
-      category: 'Auto Added' // Default category for auto-added stocks
-    };
+  private searchStocks(companyTerm: string): void {
+    console.log(`Making search request for company: "${companyTerm}"`);
     
-    this.stocksService.addStock(payload).subscribe({
-      next: () => {
-        this.loadStocks();
-        this.newStock.symbol = ''; // Clear the input after successful addition
-        console.log(`Stock ${symbol} added automatically`);
+    this.stocksService.searchStocks(companyTerm).subscribe({
+      next: (searchResults) => {
+        // Handle search results here
+        console.log(`Search API Response for "${companyTerm}":`, searchResults);
+        console.log(`Number of results found: ${searchResults.length}`);
+        console.log(`Response type: ${typeof searchResults}`);
+        console.log(`Is array: ${Array.isArray(searchResults)}`);
+        
+        if (Array.isArray(searchResults) && searchResults.length > 0) {
+          console.log(`First result:`, searchResults[0]);
+        }
+        
+        // You can display search results or handle them as needed
+        this.companyTerm = ''; // Clear the search input after search
       },
       error: (error) => {
-        console.error('Error adding stock:', error);
+        console.error('Error searching stocks:', error);
+        console.error('Error details:', {
+          status: error.status,
+          statusText: error.statusText,
+          message: error.message,
+          url: error.url
+        });
       }
     });
   }

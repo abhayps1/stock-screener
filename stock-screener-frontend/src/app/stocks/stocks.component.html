@@ -3,12 +3,12 @@
         <input 
             type="text" 
             class="form-control" 
-            [(ngModel)]="newStock.symbol" 
+            [(ngModel)]="companyTerm" 
             name="stockSymbol"
             (input)="onSymbolInput($event)"
-            placeholder="Enter stock symbol* (e.g., RELIANCE, TCS)"
+            placeholder="Enter companyDetails* (e.g., RELIANCE, TCS)"
             autocomplete="off">
-        <small class="text-muted">Stock will be added automatically after 1 second of no typing</small>
+        <!-- <small class="text-muted">Stock will be added automatically after 1 second of no typing</small> -->
     </div>
 </div>
 
