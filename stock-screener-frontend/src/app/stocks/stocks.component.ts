@@ -51,16 +51,15 @@ export class StocksComponent implements OnInit, OnDestroy {
     console.log(`Making search request for company: "${companyTerm}"`);
     
     this.stocksService.searchStocks(companyTerm).subscribe({
-      next: (searchResults) => {
-        // Handle search results here
-        console.log(`Search API Response for "${companyTerm}":`, searchResults);
-        console.log(`Response type: ${typeof searchResults}`);
-        console.log(`Response length: ${searchResults.length}`);
+      next: (htmlResponse) => {
+        console.log(`Search API Response for "${companyTerm}":`, htmlResponse);
+        console.log(`Response type: ${typeof htmlResponse}`);
+        console.log(`Response length: ${htmlResponse.length}`);
         
         // Log first 200 characters to see the HTML structure
-        console.log(`First 200 characters:`, searchResults.substring(0, 200));
+        console.log(`First 200 characters:`, htmlResponse.substring(0, 200));
         
-        // You can display search results or handle them as needed
+        // You can implement your custom logic here
         this.companyTerm = ''; // Clear the search input after search
       },
       error: (error) => {
