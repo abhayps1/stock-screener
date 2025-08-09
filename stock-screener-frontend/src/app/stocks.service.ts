@@ -18,8 +18,10 @@ export class StocksService {
     return this.http.get<Stock[]>(this.getAllStocksUrl);
   }
 
-  addStock(payload: { symbol: string; category?: string }): Observable<any> {
-    return this.http.post(this.addUrl, payload);
+  // Add via reference URL: POST /add?referenceUrl=...
+  addStock(referenceUrl: string): Observable<any> {
+    console.log("Came to service call :)" + referenceUrl)
+    return this.http.post(this.addUrl, null, { params: { referenceUrl } });
   }
 
   searchStocks(companyTerm: string): Observable<string> {

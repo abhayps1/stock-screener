@@ -61,67 +61,48 @@ public class StockService {
         return stocks;
     }
 
-    public void saveStock(String stockSymbol, String stockCategory) {
-        OkHttpClient client = new OkHttpClient();
+    public void saveStock(String referenceUrl) {
+        System.out.println("Saving stock with reference URL: " + referenceUrl);
 
-        // Generate cookies if not already present
-        if (cookieHeader == null) {
-            generateCookies();
-        }
+        String[] referenceUrlBreakDown = referenceUrl.split("/");
+        System.out.println(Arrays.toString(referenceUrlBreakDown));
+        String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
+    
+        String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/" + referenceUrlBreakDown[2];
 
-        try {
-            Request apiRequest = new Request.Builder()
-                    .url("https://www.nseindia.com/api/quote-equity?symbol=" + stockSymbol)
-                    .header("User-Agent", "Mozilla/5.0").header("Accept", "application/json")
-                    .header("Referer", "https://www.nseindia.com/").header("Cookie", cookieHeader).build();
+        String screenerUrl = "https://www.screener.in/company/" + referenceUrlBreakDown[4] + "/consolidated";
 
-            Response apiResponse = client.newCall(apiRequest).execute();
-            logger.info("NSE API response code for {}: {}", stockSymbol, apiResponse.code());
+        System.out.println("Screener URL: " + screenerUrl);
 
-            if (apiResponse.isSuccessful()) {
-                try {
-                    String responseBody = apiResponse.body().string();
-                    JSONObject data = new JSONObject(responseBody);
+        //                 Stock stock = new Stock();
+        //                 stock.setSymbol(stockSymbol);
+        //                 stock.setCompanyName(companyName);
+        //                 stock.setCategory(stockCategory);
+        //                 stock.setGrowwUrl(growwUrl);
+        //                 stock.setTrendlyneUrl(trendlyneUrl);
+        //                 stock.setScreenerUrl(screenerUrl);
 
-                    // Check for error or missing info
-                    if (data.has("info")) {
-                        String companyName = data.getJSONObject("info").getString("companyName");
-                        String companyShortName = slugify(companyName);
+        //                 stockRepository.save(stock);
 
-                        String growwUrl = "https://groww.in/stocks/" + companyShortName;
-                        String trendlyneUrl = "https://trendlyne.com/equity/" + stockSymbol + "/" + companyShortName
-                                + "/";
-                        String screenerUrl = "https://www.screener.in/company/" + stockSymbol + "/consolidated";
+        //                 logger.info("Short name for company '{}': {}", companyName, companyShortName);
+        //                 logger.info("Stock saved: {}", stock);
+        //             } else if (data.has("message")) {
+        //                 logger.warn("API Error Message for {}: {}", stockSymbol, data.getString("message"));
+        //             } else {
+        //                 logger.warn("Unexpected response format for {}: {}", stockSymbol, responseBody);
+        //             }
+        //         } catch (Exception e) {
+        //             logger.error("Error parsing JSON for {}: {}", stockSymbol, e.getMessage());
+        //         }
+        //     } else {
+        //         logger.error("Failed to fetch data for {}. Status code: {}", stockSymbol, apiResponse.code());
+        //     }
+        //     apiResponse.close(); // Always close the response
 
-                        Stock stock = new Stock();
-                        stock.setSymbol(stockSymbol);
-                        stock.setCompanyName(companyName);
-                        stock.setCategory(stockCategory);
-                        stock.setGrowwUrl(growwUrl);
-                        stock.setTrendlyneUrl(trendlyneUrl);
-                        stock.setScreenerUrl(screenerUrl);
-
-                        stockRepository.save(stock);
-
-                        logger.info("Short name for company '{}': {}", companyName, companyShortName);
-                        logger.info("Stock saved: {}", stock);
-                    } else if (data.has("message")) {
-                        logger.warn("API Error Message for {}: {}", stockSymbol, data.getString("message"));
-                    } else {
-                        logger.warn("Unexpected response format for {}: {}", stockSymbol, responseBody);
-                    }
-                } catch (Exception e) {
-                    logger.error("Error parsing JSON for {}: {}", stockSymbol, e.getMessage());
-                }
-            } else {
-                logger.error("Failed to fetch data for {}. Status code: {}", stockSymbol, apiResponse.code());
-            }
-            apiResponse.close(); // Always close the response
-
-            // stockRepository.save(stock);
-        } catch (Exception e) {
-            logger.error("An error occurred while making HTTP requests for {}: {}", stockSymbol, e.getMessage(), e);
-        }
+        //     // stockRepository.save(stock);
+        // } catch (Exception e) {
+        //     logger.error("An error occurred while making HTTP requests for {}: {}", stockSymbol, e.getMessage(), e);
+        // }
     }
 
     // Simple slugify method: lowercase, replace "limited" with "ltd", and replace

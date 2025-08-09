@@ -10,12 +10,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import com.aps.dto.AddStockRequest;
 import com.aps.entity.Stock;
 import com.aps.service.CompanyResultCalendarService;
 import com.aps.service.StockService;
@@ -69,22 +66,10 @@ public class StockController {
 	}
 
 	@PostMapping("/add")
-	public ResponseEntity<?> addStock(@RequestBody AddStockRequest request) {
-		logger.info("Adding new stock with symbol: {}", request.getSymbol());
-		
-		if (request.getSymbol() == null || request.getSymbol().trim().isEmpty()) {
-			logger.warn("Stock symbol is null or empty");
-			return ResponseEntity.badRequest().body("Stock name is mandatory.");
-		}
-		
-		try {
-			stockService.saveStock(request.getSymbol(), request.getCategory());
-			logger.info("Stock added successfully: {}", request.getSymbol());
-			return ResponseEntity.ok("Stock added successfully.");
-		} catch (Exception e) {
-			logger.error("Error occurred while adding stock {}: {}", request.getSymbol(), e.getMessage(), e);
-			return ResponseEntity.status(500).body("Internal server error occurred while adding stock");
-		}
+	public void addStock(@RequestParam String referenceUrl) {
+		logger.info("The things are working ");
+		System.out.println("Reference URL: " + referenceUrl);
+		stockService.saveStock(referenceUrl);
 	}
 
 	@GetMapping("/calendar")

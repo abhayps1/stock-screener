@@ -11,6 +11,7 @@ export class StocksComponent implements OnInit, OnDestroy {
   groupedStocks: { [category: string]: Stock[] } = {};
   newStock: Stock = {symbol : '', companyName: '', category: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
   companyTerm: string = ''; // New search variable
+  searchResponseHTML: string = '';
   showForm = false;
   hoveredStock: Stock | null = null;
   private destroy$ = new Subject<void>();
@@ -60,6 +61,7 @@ export class StocksComponent implements OnInit, OnDestroy {
         console.log(`First 200 characters:`, htmlResponse.substring(0, 200));
         
         // You can implement your custom logic here
+        this.searchResponseHTML = htmlResponse;
         this.companyTerm = ''; // Clear the search input after search
       },
       error: (error) => {
@@ -72,6 +74,36 @@ export class StocksComponent implements OnInit, OnDestroy {
         });
       }
     });
+  }
+
+  // Handle click events from injected search HTML. Uses event delegation to capture anchor clicks.
+  onSearchResultClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target) { return; }
+
+    // Walk up to nearest anchor tag if clicked inside nested elements
+    let element: HTMLElement | null = target;
+    while (element && element.tagName.toLowerCase() !== 'a') {
+      element = element.parentElement;
+    }
+
+    if (element && element.tagName.toLowerCase() === 'a') {
+      event.preventDefault();
+      const referenceUrl = (element as HTMLAnchorElement).getAttribute('href') || '';
+      if (!referenceUrl) { return; }
+
+      this.stocksService.addStock(referenceUrl).subscribe({
+        next: () => {
+          // Optionally refresh list and clear results
+          this.loadStocks();
+          // Keep or clear search results depending on UX; here we clear
+          this.searchResponseHTML = '';
+        },
+        error: (error) => {
+          console.error('Failed to add stock via reference URL:', error);
+        }
+      });
+    }
   }
 
   loadStocks() {
@@ -87,15 +119,4 @@ export class StocksComponent implements OnInit, OnDestroy {
     });
   }
 
-  addStock() {
-    const payload = {
-      symbol: this.newStock.symbol,
-      category: this.newStock.category
-    };
-    this.stocksService.addStock(payload).subscribe(() => {
-      this.loadStocks();
-      this.showForm = false;
-      this.newStock = { symbol: '', category: '' };
-    });
-  }
 }

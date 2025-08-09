@@ -12,6 +12,8 @@
     </div>
 </div>
 
+<ul class="search-results" *ngIf="searchResponseHTML" [innerHTML]="searchResponseHTML" (click)="onSearchResultClick($event)"></ul>
+
 <div *ngFor="let category of groupedStocks | keyvalue" class="mb-5">
     <h4>{{ category.key }}</h4>
     <table class="table table-bordered table-striped">
