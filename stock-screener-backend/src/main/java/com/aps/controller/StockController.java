@@ -1,7 +1,6 @@
 package com.aps.controller;
 
 import java.util.List;
-import java.util.Map;
 
 import org.json.JSONObject;
 import org.slf4j.Logger;
@@ -74,8 +73,7 @@ public class StockController {
 
 	@GetMapping("/calendar")
 	public JSONObject getMethodName() {
-		// This method is a placeholder for the calendar functionality.
-		// It can be used to trigger the fetching of company results.
+		
 		logger.info("Fetching company results from calendar");
 		try {
 			JSONObject json = companyResultCalendar.fetchCompanyResults();
@@ -89,23 +87,6 @@ public class StockController {
 		}
 	}
 
-	@GetMapping("/rsi-mfi")
-	public ResponseEntity<Map<String, String>> getRsiAndMfiData() {
-		logger.info("Fetching RSI and MFI data");
-		try {
-			Map<String, String> result = stockService.getIndicatorsData();
-			if(result.containsKey("error")) {
-				logger.warn("Error in RSI/MFI data: {}", result.get("error"));
-				return ResponseEntity.status(500).body(result);
-			}
-			logger.info("Successfully fetched RSI and MFI data");
-			return ResponseEntity.ok(result);
-		} catch (Exception e) {
-			logger.error("Error occurred while fetching RSI and MFI data: {}", e.getMessage(), e);
-			Map<String, String> errorResult = Map.of("error", "Internal server error occurred while fetching indicators data");
-			return ResponseEntity.status(500).body(errorResult);
-		}
-	}
 
 	@GetMapping("/health")
 	public ResponseEntity<String> healthCheck() {

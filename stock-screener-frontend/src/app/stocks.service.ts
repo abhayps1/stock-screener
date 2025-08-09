@@ -20,7 +20,6 @@ export class StocksService {
 
   // Add via reference URL: POST /add?referenceUrl=...
   addStock(referenceUrl: string): Observable<any> {
-    console.log("Came to service call :)" + referenceUrl)
     return this.http.post(this.addUrl, null, { params: { referenceUrl } });
   }
 

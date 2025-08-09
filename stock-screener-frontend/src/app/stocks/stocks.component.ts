@@ -49,17 +49,8 @@ export class StocksComponent implements OnInit, OnDestroy {
   }
 
   private searchStocks(companyTerm: string): void {
-    console.log(`Making search request for company: "${companyTerm}"`);
-    
     this.stocksService.searchStocks(companyTerm).subscribe({
       next: (htmlResponse) => {
-        console.log(`Search API Response for "${companyTerm}":`, htmlResponse);
-        console.log(`Response type: ${typeof htmlResponse}`);
-        console.log(`Response length: ${htmlResponse.length}`);
-        
-        // Log first 200 characters to see the HTML structure
-        console.log(`First 200 characters:`, htmlResponse.substring(0, 200));
-        
         // You can implement your custom logic here
         this.searchResponseHTML = htmlResponse;
         this.companyTerm = ''; // Clear the search input after search
