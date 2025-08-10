@@ -99,7 +99,23 @@ export class StocksComponent implements OnInit, OnDestroy {
 
   loadStocks() {
     this.stocksService.getStocks().subscribe(stocks => {
-      this.stocks = stocks;
+      this.stocks = stocks.map(stock => {
+        if (stock.indicatorData) {
+          try {
+            const indicators = JSON.parse(stock.indicatorData);
+            stock['rsi'] = indicators['Day RSI'] || '';
+            stock['mfi'] = indicators['Day MFI'] || '';
+          } catch (e) {
+            console.error('Error parsing indicatorData JSON', e);
+            stock['rsi'] = '';
+            stock['mfi'] = '';
+          }
+        } else {
+          stock['rsi'] = '';
+          stock['mfi'] = '';
+        }
+        return stock;
+      });
     });
   }
 

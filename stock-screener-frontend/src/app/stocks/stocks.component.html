@@ -19,6 +19,8 @@
         <thead>
             <tr>
                 <th>Company Name</th>
+                <th>RSI</th>
+                <th>MFI</th>
             </tr>
         </thead>
         <tbody>
@@ -45,6 +47,8 @@
                         </div>
                     </div>
                 </td>
+                <td>{{ stock.rsi || 'N/A' }}</td>
+                <td>{{ stock.mfi || 'N/A' }}</td>
             </tr>
         </tbody>
     </table>

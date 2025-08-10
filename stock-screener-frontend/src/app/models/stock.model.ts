@@ -4,4 +4,6 @@ export interface Stock {
   screenerUrl?: string;
   trendlyneUrl?: string;
   indicatorData?: string;
+  rsi?: string;
+  mfi?: string;
 }
