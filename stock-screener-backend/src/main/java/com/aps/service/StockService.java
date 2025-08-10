@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import com.aps.entity.Stock;
 import com.aps.repository.StockRepository;
 import com.aps.util.StockUtility;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
@@ -37,17 +38,25 @@ public class StockService {
     public void saveStock(String referenceUrl) {
         String[] referenceUrlBreakDown = referenceUrl.split("/");
         String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
-        String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/" + referenceUrlBreakDown[2];
+        String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/"
+                + referenceUrlBreakDown[2];
         String screenerUrl = "https://www.screener.in/company/" + referenceUrlBreakDown[4] + "/consolidated";
-        
+
         HashMap<String, String> indicators = stockUtility.fetchIndicatorsData(trendlyneUrl);
+        ObjectMapper mapper = new ObjectMapper();
+        String indicatorString = "";
+        try {
+            indicatorString = mapper.writeValueAsString(indicators);
+        } catch (IOException e) {
+            logger.error("Error converting indicators to JSON string: {}", e.getMessage());
+        }
 
         Stock stock = new Stock();
         stock.setStockName(referenceUrlBreakDown[2]);
         stock.setGrowwUrl(growwUrl);
         stock.setScreenerUrl(screenerUrl);
         stock.setTrendlyneUrl(trendlyneUrl);
-        stock.setIndicatorData(indicators.toString());
+        stock.setIndicatorData(indicatorString);
         stockRepository.save(stock);
     }
 
@@ -79,10 +88,10 @@ public class StockService {
             response = client.newCall(request).execute();
             return response.body().string();
         } catch (IOException e) {
-            
+
             return "<h6>Request failed</h6>";
         }
-          
+
     }
 
 }

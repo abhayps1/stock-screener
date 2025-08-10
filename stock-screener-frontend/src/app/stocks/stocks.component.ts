@@ -8,8 +8,8 @@ import { Subject, debounceTime, takeUntil } from 'rxjs';
   templateUrl: './stocks.component.html'
 })
 export class StocksComponent implements OnInit, OnDestroy {
-  groupedStocks: { [category: string]: Stock[] } = {};
-  newStock: Stock = {symbol : '', companyName: '', category: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
+  stocks: Stock[] = [];
+  newStock: Stock = {stockName: '', growwUrl: '', screenerUrl: '', trendlyneUrl: '' };
   companyTerm: string = ''; // New search variable
   searchResponseHTML: string = '';
   showForm = false;
@@ -99,14 +99,7 @@ export class StocksComponent implements OnInit, OnDestroy {
 
   loadStocks() {
     this.stocksService.getStocks().subscribe(stocks => {
-      this.groupedStocks = stocks.reduce((acc, stock) => {
-        const category = stock.category || 'Uncategorized';
-        if (!acc[category]) {
-          acc[category] = [];
-        }
-        acc[category].push(stock);
-        return acc;
-      }, {} as { [category: string]: Stock[] });
+      this.stocks = stocks;
     });
   }
 

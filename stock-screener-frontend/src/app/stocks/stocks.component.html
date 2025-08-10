@@ -14,8 +14,7 @@
 
 <ul class="search-results" *ngIf="searchResponseHTML" [innerHTML]="searchResponseHTML" (click)="onSearchResultClick($event)"></ul>
 
-<div *ngFor="let category of groupedStocks | keyvalue" class="mb-5">
-    <h4>{{ category.key }}</h4>
+<div class="mb-5">
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
@@ -23,7 +22,7 @@
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let stock of category.value">
+            <tr *ngFor="let stock of stocks">
                 <td class="position-relative stock-hover-group">
                     <div
                         (mouseenter)="hoveredStock = stock"
@@ -31,7 +30,7 @@
                         style="display: inline-block; position: relative;"
                     >
                         <span class="stock-name-hover">
-                          {{ stock.companyName }}
+                          {{ stock.stockName }}
                         </span>
                         <div class="stock-url-popup" *ngIf="hoveredStock === stock">
                           <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">
