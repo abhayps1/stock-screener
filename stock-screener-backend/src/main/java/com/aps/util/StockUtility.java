@@ -8,14 +8,34 @@ import java.util.List;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
 
 @Component
 public class StockUtility {
+
+    private static final Logger logger = LoggerFactory.getLogger(StockUtility.class);
+
+    public String getIndicatorData(String trendlyneUrl) {
+        String indicatorString = null;
+        HashMap<String, String> indicators = fetchIndicatorsData(trendlyneUrl);
+        if (indicators.containsKey("error")) {
+            logger.error("Error fetching indicators data: {}", indicators.get("error"));
+        } else {
+            ObjectMapper mapper = new ObjectMapper();
+            try {
+                indicatorString = mapper.writeValueAsString(indicators);
+            } catch (IOException e) {
+                logger.error("Error converting indicators to JSON string: {}", e.getMessage());
+            }
+        }
+        return indicatorString;
+    }
 
     public HashMap<String, String> fetchIndicatorsData(String trendlyneURL) {
 
@@ -96,4 +116,6 @@ public class StockUtility {
         }
         return indicator + " data is not found";
     }
+
+    
 }

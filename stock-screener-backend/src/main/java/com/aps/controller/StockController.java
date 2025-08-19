@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import com.aps.entity.Stock;
-import com.aps.service.CompanyResultCalendarService;
 import com.aps.service.StockService;
 
 
@@ -26,11 +25,6 @@ public class StockController {
 	@Autowired
 	private StockService stockService;
 
-	@Autowired
-	private CompanyResultCalendarService companyResultCalendar;
-
-
-	//searchStockData
 	@GetMapping("/search")
 	public ResponseEntity<String> searchStock(@RequestParam String companyTerm) {
 		logger.info("Searching for the term: {}", companyTerm);
@@ -76,7 +70,7 @@ public class StockController {
 		
 		logger.info("Fetching company results from calendar");
 		try {
-			JSONObject json = companyResultCalendar.fetchCompanyResults();
+			JSONObject json = stockService.fetchCompanyResults();
 			logger.info("Successfully fetched company results from calendar");
 			return json;
 		} catch (Exception e) {
@@ -87,11 +81,10 @@ public class StockController {
 		}
 	}
 
-
-	@GetMapping("/health")
-	public ResponseEntity<String> healthCheck() {
-		logger.info("Health check endpoint called");
-		return ResponseEntity.ok("Backend is running successfully!");
+	@GetMapping("/updateIndicatorData")
+	public void updateIndicatorData() {
+		logger.info("Updating indicator data for all stocks");
+		stockService.updateIndicatorData();
 	}
 
 }

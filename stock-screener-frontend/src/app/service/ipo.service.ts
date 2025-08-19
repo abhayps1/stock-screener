@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import {map, Observable } from 'rxjs';
-import { IpoDTO } from './models/ipo-dto.model'; // adjust path if needed
+import { IpoDTO } from '../models/ipo-dto.model'; // adjust path if needed
 
 @Injectable({
   providedIn: 'root'
