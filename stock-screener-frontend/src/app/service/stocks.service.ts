@@ -7,10 +7,12 @@ import { Stock } from '../models/stock.model';
   providedIn: 'root'
 })
 export class StocksService {
+  
   private baseUrl = 'http://localhost:8080/api/stock';
   private getAllStocksUrl = this.baseUrl+'/allStocks';
   private addUrl = this.baseUrl+'/add';
   private searchUrl = this.baseUrl+'/search'; // New search endpoint
+  private refreshIndicatorsUrl = this.baseUrl+'/updateIndicatorData'; // New endpoint for refreshing indicators
 
   constructor(private http: HttpClient) { }
 
@@ -25,5 +27,9 @@ export class StocksService {
 
   searchStocks(companyTerm: string): Observable<string> {
     return this.http.get(`${this.searchUrl}?companyTerm=${encodeURIComponent(companyTerm)}`, { responseType: 'text' });
+  }
+
+  updateIndicatorData() {
+    return this.http.get(this.refreshIndicatorsUrl, { responseType: 'text' });
   }
 }

@@ -119,4 +119,16 @@ export class StocksComponent implements OnInit, OnDestroy {
     });
   }
 
+  updateIndicatorData(): void {
+    this.stocksService.updateIndicatorData().subscribe({
+      next: () => {
+        console.log('Indicators refreshed successfully');
+        this.loadStocks(); // Reload stocks to reflect updated indicators
+      },
+      error: (error) => {
+        console.error('Error refreshing indicators:', error);
+      }
+    });
+  }
+
 }

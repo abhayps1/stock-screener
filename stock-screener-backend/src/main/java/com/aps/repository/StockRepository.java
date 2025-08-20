@@ -23,7 +23,7 @@ public interface StockRepository extends JpaRepository<Stock, String> {
 
 	@Modifying
     @Transactional
-    @Query("UPDATE Stock s SET s.indicatorData = :indicatorData WHERE s.trendlyneUrl = :url")
+    @Query("UPDATE Stock s SET s.indicatorData = :indicatorData WHERE s.trendlyneUrl = :trendlyneUrl")
 	void updateIndicatorData(String trendlyneUrl, String indicatorData);
 
 }
