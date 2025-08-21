@@ -44,6 +44,8 @@ public class StockService {
     }
 
     public void saveStock(String referenceUrl) {
+        System.out.println("Saving stock with reference URL: " + referenceUrl);
+        referenceUrl = referenceUrl.replace("(", "").replace(")", "");
         String[] referenceUrlBreakDown = referenceUrl.split("/");
         String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
         String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/"
