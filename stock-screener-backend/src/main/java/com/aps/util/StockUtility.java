@@ -21,9 +21,8 @@ public class StockUtility {
 
     private static final Logger logger = LoggerFactory.getLogger(StockUtility.class);
 
-    public String getIndicatorData(String trendlyneUrl) {
+    public String mapToString(HashMap<String, String> indicators) {
         String indicatorString = null;
-        HashMap<String, String> indicators = fetchIndicatorsData(trendlyneUrl);
         if (indicators.containsKey("error")) {
             logger.error("Error fetching indicators data: {}", indicators.get("error"));
         } else {
@@ -37,12 +36,12 @@ public class StockUtility {
         return indicatorString;
     }
 
-    public HashMap<String, String> fetchIndicatorsData(String trendlyneURL) {
-
+    public String getTrendlyneUniqueId(String trendlyneUrl) {
         HashMap<String, String> indicatorsMap = new HashMap<>();
         OkHttpClient client = new OkHttpClient();
 
-        Request request = new Request.Builder().url(trendlyneURL).build();
+        Request request = new Request.Builder().url(trendlyneUrl).build();
+        String trendlyneUniqueId = null;
 
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
@@ -52,56 +51,62 @@ public class StockUtility {
                 Document doc = Jsoup.parse(responseData);
                 Element infoCard = doc.selectFirst("div.stock_info_card.LpriceTop");
                 if (infoCard != null) {
-                    String myId = infoCard.attr("data-myid");
-                    String lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/" + myId + "/";
-
-                    Request lazyLoadRequest = new Request.Builder().url(lazyLoadUrl).get().build();
-
-                    try (Response lazyLoadResponse = client.newCall(lazyLoadRequest).execute()) {
-                        if (lazyLoadResponse.isSuccessful() && lazyLoadResponse.body() != null) {
-                            String html = lazyLoadResponse.body().string();
-                            Document document = org.jsoup.Jsoup.parse(html);
-
-                            List<String> indicators = Arrays.asList(
-                                    "Day RSI",
-                                    "Day MACD",
-                                    "Day MFI",
-                                    "Day MACD Signal Line",
-                                    "Day ADX",
-                                    "Day ATR",
-                                    "Day Commodity Channel Index",
-                                    "Day ROC125",
-                                    "Day ROC21",
-                                    "William");
-
-                            for (String indicator : indicators) {
-                                indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(document, indicator));
-                            }
-
-                            return indicatorsMap;
-                        } else {
-                            indicatorsMap.put("error", "Failed to fetch data: " + lazyLoadResponse.code());
-                            return indicatorsMap;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
-                        return indicatorsMap;
-                    }
-
+                    trendlyneUniqueId = infoCard.attr("data-myid");
                 } else {
-                    indicatorsMap.put("error", "Unable to get the stock index in trendlyne.");
-                    return indicatorsMap;
+                    logger.error("Unable to get the stock index in trendlyne.");
                 }
             } else {
-                indicatorsMap.put("error", "Request failed: " + response.code());
-                return indicatorsMap;
+                logger.error("Request failed: {}", response.code());
             }
         } catch (IOException e) {
+            logger.error("Exception occurred: {}", e.getMessage());
+        }
+        return trendlyneUniqueId;
+    }
+
+    public HashMap<String, String> fetchIndicatorsMap(String getTrendlyneUniqueId) {
+
+        HashMap<String, String> indicatorsMap = new HashMap<>();
+        OkHttpClient client = new OkHttpClient();
+        String lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/" + getTrendlyneUniqueId + "/";
+
+        Request request = new Request.Builder().url(lazyLoadUrl).get().build();
+
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            if (response.isSuccessful() && response.body() != null) {
+                String html = response.body().string();
+                Document document = org.jsoup.Jsoup.parse(html);
+
+                List<String> indicators = Arrays.asList(
+                        "Day RSI",
+                        "Day MACD",
+                        "Day MFI",
+                        "Day MACD Signal Line",
+                        "Day ADX",
+                        "Day ATR",
+                        "Day Commodity Channel Index",
+                        "Day ROC125",
+                        "Day ROC21",
+                        "William");
+                for (String indicator : indicators) {
+                    indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(document, indicator));
+                }
+
+                return indicatorsMap;
+
+            } else {
+                indicatorsMap.put("error", "Failed to fetch data: " + response.code());
+                return indicatorsMap;
+            }
+        }
+
+        catch (IOException e) {
             e.printStackTrace();
             indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
-            return indicatorsMap;
         }
+        return indicatorsMap;
 
     }
 
@@ -117,5 +122,4 @@ public class StockUtility {
         return indicator + " data is not found";
     }
 
-    
 }

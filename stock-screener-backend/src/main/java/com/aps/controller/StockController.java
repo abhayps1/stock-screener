@@ -61,7 +61,6 @@ public class StockController {
 	@PostMapping("/add")
 	public void addStock(@RequestParam String referenceUrl) {
 		logger.info("The things are working ");
-		System.out.println("Reference URL: " + referenceUrl);
 		stockService.saveStock(referenceUrl);
 	}
 

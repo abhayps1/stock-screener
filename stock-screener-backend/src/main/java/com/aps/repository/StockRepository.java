@@ -18,12 +18,12 @@ public interface StockRepository extends JpaRepository<Stock, String> {
 	// For example, to find a stock by its name:
 	// Optional<Stock> findByStockName(String stockName);
 
-	@Query("SELECT s.trendlyneUrl FROM Stock s WHERE s.trendlyneUrl IS NOT NULL AND s.indicatorData IS NOT NULL")
-	List<String> getAllTrendlyneUrls();
+	@Query("SELECT s.trendlyneUniqueId FROM Stock s WHERE s.trendlyneUniqueId IS NOT NULL")
+	List<String> getAllTrendlyneUniqueId();
 
 	@Modifying
     @Transactional
-    @Query("UPDATE Stock s SET s.indicatorData = :indicatorData WHERE s.trendlyneUrl = :trendlyneUrl")
-	void updateIndicatorData(String trendlyneUrl, String indicatorData);
+    @Query("UPDATE Stock s SET s.indicatorData = :indicatorData WHERE s.trendlyneUniqueId = :trendlyneUniqueId")
+	void updateIndicatorData(String trendlyneUniqueId, String indicatorData);
 
 }

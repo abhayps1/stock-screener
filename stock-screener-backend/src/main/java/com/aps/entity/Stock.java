@@ -22,4 +22,6 @@ public class Stock {
 	private String trendlyneUrl;
 
 	private String indicatorData;
+
+	private String trendlyneUniqueId;
 }

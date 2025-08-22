@@ -3,6 +3,7 @@ package com.aps.service;
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -52,7 +53,9 @@ public class StockService {
                 + referenceUrlBreakDown[2];
         String screenerUrl = "https://www.screener.in/company/" + referenceUrlBreakDown[4] + "/consolidated";
 
-        String indicatorString = stockUtility.getIndicatorData(trendlyneUrl);
+        String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
+        HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+        String indicatorString = stockUtility.mapToString(indicatorMap);
 
         Stock stock = new Stock();
         stock.setStockName(referenceUrlBreakDown[2]);
@@ -60,18 +63,23 @@ public class StockService {
         stock.setScreenerUrl(screenerUrl);
         stock.setTrendlyneUrl(trendlyneUrl);
         stock.setIndicatorData(indicatorString);
+        stock.setTrendlyneUniqueId(trendlyneUniqueId);
+        
         stockRepository.save(stock);
     }
 
     public void updateIndicatorData() {
-        List<String> urls = stockRepository.getAllTrendlyneUrls();
-        logger.info("Total Trendlyne URLs to update: {}", urls.size());
+        List<String> trendlyneUniqueIds = stockRepository.getAllTrendlyneUniqueId();
+        logger.info("Updating indicator data for {} stocks", trendlyneUniqueIds.size());
         
-        for (String trendlyneUrl : urls) {
-            String indicatorData = stockUtility.getIndicatorData(trendlyneUrl);
-            stockRepository.updateIndicatorData(trendlyneUrl, indicatorData);
-            logger.info("Updated indicator data for URL: {}", trendlyneUrl);
+        for (String trendlyneUniqueId : trendlyneUniqueIds) {
+            HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+            String indicatorString = stockUtility.mapToString(indicatorMap);
+            stockRepository.updateIndicatorData(trendlyneUniqueId, indicatorString);
+            logger.info("Updated indicator data for trendlyneUniqueId: {}", trendlyneUniqueId);
+            System.out.println("Updated indicator data for trendlyneUniqueId: " + trendlyneUniqueId);
         }
+        logger.info("Indicator data update completed.");
     }
 
     public String searchStock(String companyTerm) {
