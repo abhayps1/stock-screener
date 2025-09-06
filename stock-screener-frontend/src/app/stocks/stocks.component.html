@@ -1,50 +1,51 @@
-<button class="btn btn-primary mb-3" (click)="showForm = true" *ngIf="!showForm">Add Stock</button>
-
-<form *ngIf="showForm" (ngSubmit)="addStock()" #stockForm="ngForm" class="mb-4 center-modal-form">
+<div class="mb-4 center-modal-form">
     <div class="mb-2">
-        <label>Symbol *</label>
-        <input type="text" class="form-control" required [(ngModel)]="newStock.symbol" name="stockName">
+        <input type="text" class="form-control" [(ngModel)]="companyTerm" name="stockSymbol"
+            (input)="onSymbolInput($event)" placeholder="Enter companyDetails* (e.g., RELIANCE, TCS)"
+            autocomplete="off">
+        <!-- <small class="text-muted">Stock will be added automatically after 1 second of no typing</small> -->
     </div>
-    <div class="mb-2">
-        <label>Category</label>
-        <input type="text" class="form-control" [(ngModel)]="newStock.category" name="stockCategory">
-    </div>
-    <button class="btn btn-success" type="submit" [disabled]="!newStock.symbol">Submit</button>
-    <button class="btn btn-secondary ms-2" type="button" (click)="showForm = false">Cancel</button>
-</form>
+</div>
 
-<div *ngFor="let category of groupedStocks | keyvalue" class="mb-5">
-    <h4>{{ category.key }}</h4>
+<ul class="search-results" *ngIf="searchResponseHTML" [innerHTML]="searchResponseHTML"
+    (click)="onSearchResultClick($event)"></ul>
+
+<a title="Refresh Indicators" class="refresh-icon" (click)="updateIndicatorData()">
+    <img src="assets/images/icons/refresh.svg" alt="Refresh Indicators" width="24" height="24" />
+</a>
+
+<div class="mb-5">
     <table class="table table-bordered table-striped">
         <thead>
             <tr>
                 <th>Company Name</th>
+                <th>RSI</th>
+                <th>MFI</th>
             </tr>
         </thead>
         <tbody>
-            <tr *ngFor="let stock of category.value">
+            <tr *ngFor="let stock of stocks">
                 <td class="position-relative stock-hover-group">
-                    <div
-                        (mouseenter)="hoveredStock = stock"
-                        (mouseleave)="hoveredStock = null"
-                        style="display: inline-block; position: relative;"
-                    >
+                    <div (mouseenter)="hoveredStock = stock" (mouseleave)="hoveredStock = null"
+                        style="display: inline-block; position: relative;">
                         <span class="stock-name-hover">
-                          {{ stock.companyName }}
+                            {{ stock.stockName }}
                         </span>
                         <div class="stock-url-popup" *ngIf="hoveredStock === stock">
-                          <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">
-                            <img src="assets/images/icons/groww.svg" alt="Groww" width="28" height="28" />
-                          </a>
-                          <a *ngIf="stock.screenerUrl" [href]="stock.screenerUrl" target="_blank" title="Screener">
-                            <img src="assets/images/icons/screener.svg" alt="Screener" width="28" height="28" />
-                          </a>
-                          <a *ngIf="stock.trendlyneUrl" [href]="stock.trendlyneUrl" target="_blank" title="Trendlyne">
-                            <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="28" height="28" />
-                          </a>
+                            <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">
+                                <img src="assets/images/icons/groww.svg" alt="Groww" width="28" height="28" />
+                            </a>
+                            <a *ngIf="stock.screenerUrl" [href]="stock.screenerUrl" target="_blank" title="Screener">
+                                <img src="assets/images/icons/screener.svg" alt="Screener" width="28" height="28" />
+                            </a>
+                            <a *ngIf="stock.trendlyneUrl" [href]="stock.trendlyneUrl" target="_blank" title="Trendlyne">
+                                <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="28" height="28" />
+                            </a>
                         </div>
                     </div>
                 </td>
+                <td>{{ stock.rsi || 'N/A' }}</td>
+                <td>{{ stock.mfi || 'N/A' }}</td>
             </tr>
         </tbody>
     </table>

@@ -34,3 +34,7 @@ build/
 
 ### Mvn entire folder ###
 .mvn/
+
+### Logs ###
+logs/
+*.log

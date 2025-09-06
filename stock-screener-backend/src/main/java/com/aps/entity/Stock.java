@@ -13,11 +13,7 @@ public class Stock {
 
 	@Id
 	@Column(nullable = false, unique = true)
-	private String symbol;
-
-	private String companyName;
-
-	private String category;
+	private String stockName;
 
 	private String growwUrl;
 
@@ -25,6 +21,7 @@ public class Stock {
 
 	private String trendlyneUrl;
 
-	
+	private String indicatorData;
 
+	private String trendlyneUniqueId;
 }

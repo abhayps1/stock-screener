@@ -1,11 +1,12 @@
 package com.aps.service;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -17,7 +18,11 @@ import org.springframework.stereotype.Service;
 
 import com.aps.entity.Stock;
 import com.aps.repository.StockRepository;
+import com.aps.util.StockUtility;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
+import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -30,29 +35,8 @@ public class StockService {
     @Autowired
     private StockRepository stockRepository;
 
-    private String cookieHeader = null; // Store cookies here
-
-    private void generateCookies() {
-        System.out.println("Cookie header generation started");
-        OkHttpClient client = new OkHttpClient();
-        try {
-            Request homepageRequest = new Request.Builder()
-                    .url("https://www.nseindia.com/market-data/new-stock-exchange-listings-today")
-                    .header("User-Agent", "Mozilla/5.0").header("Accept", "text/html").build();
-
-            Response homepageResponse = client.newCall(homepageRequest).execute();
-            List<String> cookies = homepageResponse.headers("Set-Cookie");
-            StringBuilder cookieBuilder = new StringBuilder();
-            for (String cookie : cookies) {
-                cookieBuilder.append(cookie.split(";", 2)[0]).append("; ");
-            }
-            homepageResponse.close();
-            cookieHeader = cookieBuilder.toString();
-            logger.debug("Cookies generated for NSE request: {}", cookieHeader);
-        } catch (Exception e) {
-            logger.error("Error generating cookies: {}", e.getMessage(), e);
-        }
-    }
+    @Autowired
+    private StockUtility stockUtility;
 
     public List<Stock> fetchAllStocks() {
         List<Stock> stocks = stockRepository.findAll();
@@ -60,156 +44,163 @@ public class StockService {
         return stocks;
     }
 
-    public void saveStock(String stockSymbol, String stockCategory) {
+    public void saveStock(String referenceUrl) {
+        System.out.println("Saving stock with reference URL: " + referenceUrl);
+        referenceUrl = referenceUrl.replace("(", "").replace(")", "");
+        String[] referenceUrlBreakDown = referenceUrl.split("/");
+        String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
+        String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/"
+                + referenceUrlBreakDown[2];
+        String screenerUrl = "https://www.screener.in/company/" + referenceUrlBreakDown[4] + "/consolidated";
+
+        String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
+        HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+        String indicatorString = stockUtility.mapToString(indicatorMap);
+
+        Stock stock = new Stock();
+        stock.setStockName(referenceUrlBreakDown[2]);
+        stock.setGrowwUrl(growwUrl);
+        stock.setScreenerUrl(screenerUrl);
+        stock.setTrendlyneUrl(trendlyneUrl);
+        stock.setIndicatorData(indicatorString);
+        stock.setTrendlyneUniqueId(trendlyneUniqueId);
+        
+        stockRepository.save(stock);
+    }
+
+    public void updateIndicatorData() {
+        List<String> trendlyneUniqueIds = stockRepository.getAllTrendlyneUniqueId();
+        logger.info("Updating indicator data for {} stocks", trendlyneUniqueIds.size());
+        
+        for (String trendlyneUniqueId : trendlyneUniqueIds) {
+            HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+            String indicatorString = stockUtility.mapToString(indicatorMap);
+            stockRepository.updateIndicatorData(trendlyneUniqueId, indicatorString);
+            logger.info("Updated indicator data for trendlyneUniqueId: {}", trendlyneUniqueId);
+            System.out.println("Updated indicator data for trendlyneUniqueId: " + trendlyneUniqueId);
+        }
+        logger.info("Indicator data update completed.");
+    }
+
+    public String searchStock(String companyTerm) {
         OkHttpClient client = new OkHttpClient();
 
-        // Generate cookies if not already present
-        if (cookieHeader == null) {
-            generateCookies();
+        HttpUrl url = new HttpUrl.Builder()
+                .scheme("https")
+                .host("api.bseindia.com")
+                .addPathSegments("Msource/1D/getQouteSearch.aspx")
+                .addQueryParameter("Type", "EQ")
+                .addQueryParameter("text", companyTerm)
+                .addQueryParameter("flag", "site")
+                .build();
+
+        Request request = new Request.Builder()
+                .url(url)
+                .addHeader("sec-ch-ua-platform", "\"Windows\"")
+                .addHeader("Referer", "https://www.bseindia.com/")
+                .addHeader("User-Agent",
+                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
+                .addHeader("Accept", "application/json, text/plain, */*")
+                .addHeader("sec-ch-ua", "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"")
+                .addHeader("sec-ch-ua-mobile", "?0")
+                .build();
+
+        Response response;
+        try {
+            response = client.newCall(request).execute();
+            return response.body().string();
+        } catch (IOException e) {
+
+            return "<h6>Request failed</h6>";
         }
+
+    }
+
+    public JSONObject fetchCompanyResults() {
+        // Implementation for fetching company results
+        // This method will interact with the StockService to get stock data
+        // and process it accordingly.
 
         try {
-            Request apiRequest = new Request.Builder()
-                    .url("https://www.nseindia.com/api/quote-equity?symbol=" + stockSymbol)
-                    .header("User-Agent", "Mozilla/5.0").header("Accept", "application/json")
-                    .header("Referer", "https://www.nseindia.com/").header("Cookie", cookieHeader).build();
+            OkHttpClient client = new OkHttpClient();
 
-            Response apiResponse = client.newCall(apiRequest).execute();
-            logger.info("NSE API response code for {}: {}", stockSymbol, apiResponse.code());
+            String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String threeDaysBefore = LocalDate.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
-            if (apiResponse.isSuccessful()) {
-                try {
-                    String responseBody = apiResponse.body().string();
-                    JSONObject data = new JSONObject(responseBody);
+            String url = "https://groww.in/v1/api/stocks_data/equity_feature/v2/corporate_action/event?from="
+                    + threeDaysBefore + "&to=" + today;
 
-                    // Check for error or missing info
-                    if (data.has("info")) {
-                        String companyName = data.getJSONObject("info").getString("companyName");
-                        String companyShortName = slugify(companyName);
+            // Step 1: Make HTTP GET request
+            Request request = new Request.Builder().url(url)
+                    .header("User-Agent", "Mozilla/5.0").build();
 
-                        String growwUrl = "https://groww.in/stocks/" + companyShortName;
-                        String trendlyneUrl = "https://trendlyne.com/equity/" + stockSymbol + "/" + companyShortName
-                                + "/";
-                        String screenerUrl = "https://www.screener.in/company/" + stockSymbol + "/consolidated";
+            Response response = client.newCall(request).execute();
+            String responseBody = response.body().string();
 
-                        Stock stock = new Stock();
-                        stock.setSymbol(stockSymbol);
-                        stock.setCompanyName(companyName);
-                        stock.setCategory(stockCategory);
-                        stock.setGrowwUrl(growwUrl);
-                        stock.setTrendlyneUrl(trendlyneUrl);
-                        stock.setScreenerUrl(screenerUrl);
+            // Parse JSON and get announcementEvents
+            JSONObject json = new JSONObject(responseBody);
 
-                        stockRepository.save(stock);
+            // Loop through only exdateEvents array for RESULTS type events
+            String arrayName = "exdateEvents";
+            if (json.has(arrayName)) {
+                JSONArray events = json.getJSONArray(arrayName);
+                for (int i = 0; i < 1; i++) {
+                    JSONObject event = events.getJSONObject(i);
+                    if ("RESULTS".equals(event.optString("type"))) {
+                        String searchId = event.optString("searchId");
+                        JSONObject pill = event.optJSONObject("corporateEventPillDto");
+                        String primaryDate = pill != null ? pill.optString("primaryDate") : "";
+                        // System.out.println("searchId: " + searchId + ", primaryDate: " +
+                        // primaryDate);
 
-                        logger.info("Short name for company '{}': {}", companyName, companyShortName);
-                        logger.info("Stock saved: {}", stock);
-                    } else if (data.has("message")) {
-                        logger.warn("API Error Message for {}: {}", stockSymbol, data.getString("message"));
-                    } else {
-                        logger.warn("Unexpected response format for {}: {}", stockSymbol, responseBody);
+                        getFinancialStatement(searchId);
                     }
-                } catch (Exception e) {
-                    logger.error("Error parsing JSON for {}: {}", stockSymbol, e.getMessage());
                 }
-            } else {
-                logger.error("Failed to fetch data for {}. Status code: {}", stockSymbol, apiResponse.code());
             }
-            apiResponse.close(); // Always close the response
-
-            // stockRepository.save(stock);
+            return json;
         } catch (Exception e) {
-            logger.error("An error occurred while making HTTP requests for {}: {}", stockSymbol, e.getMessage(), e);
+            e.printStackTrace();
         }
+        return null;
     }
 
-    // Simple slugify method: lowercase, replace "limited" with "ltd", and replace
-    // spaces with hyphens
-    private static String slugify(String input) {
-        String processed = input.toLowerCase().replaceAll("limited", "ltd");
-        return processed.replaceAll("[^a-z0-9]+", "-").replaceAll("-$", "").replaceAll("^-", "");
-    }
-
-    public Map<String, String> getIndicatorsData() {
-
-        Map<String, String> indicatorsMap = new HashMap<>();
-        String trendlyneURL = "https://trendlyne.com/equity/SHILCTECH/shilchar-technologies-ltd/";
+    public void getFinancialStatement(String searchId) {
+        String growwUrl = "https://groww.in/stocks/" + searchId;
         OkHttpClient client = new OkHttpClient();
 
-        Request request = new Request.Builder().url(trendlyneURL).build();
+        Request request = new Request.Builder().url(growwUrl).build();
 
         try (Response response = client.newCall(request).execute()) {
             if (response.isSuccessful() && response.body() != null) {
                 String responseData = response.body().string();
 
-                // Parse HTML and extract data-myid
+                // Parse HTML and extract JSON from __NEXT_DATA__ script tag
                 Document doc = Jsoup.parse(responseData);
-                Element infoCard = doc.selectFirst("div.stock_info_card.LpriceTop");
-                if (infoCard != null) {
-                    String myId = infoCard.attr("data-myid");
-                    String lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/" + myId + "/";
+                Element nextDataScript = doc.getElementById("__NEXT_DATA__");
+                if (nextDataScript != null) {
+                    String jsonData = nextDataScript.html();
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode root = mapper.readTree(jsonData);
+                    JsonNode financialStatement = root
+                            .path("props")
+                            .path("pageProps")
+                            .path("stockData")
+                            .path("financialStatement");
 
-                    Request lazyLoadRequest = new Request.Builder().url(lazyLoadUrl).get().build();
-
-                    try (Response lazyLoadResponse = client.newCall(lazyLoadRequest).execute()) {
-                        if (lazyLoadResponse.isSuccessful() && lazyLoadResponse.body() != null) {
-                            String html = lazyLoadResponse.body().string();
-                            Document document = org.jsoup.Jsoup.parse(html);
-
-                            List<String> indicators = Arrays.asList(
-                                    "Day RSI",
-                                    "Day MACD",
-                                    "Day MFI",
-                                    "Day MACD Signal Line",
-                                    "Day ADX",
-                                    "Day ATR",
-                                    "Day Commodity Channel Index",
-                                    "Day ROC125",
-                                    "Day ROC21",
-                                    "William");
-
-                            for (String indicator : indicators) {
-                                indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(document, indicator));
-                            }
-                            System.out.println(indicatorsMap);
-
-                            return indicatorsMap;
-                        } else {
-                            indicatorsMap.put("error", "Failed to fetch data: " + lazyLoadResponse.code());
-                            return indicatorsMap;
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                        indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
-                        return indicatorsMap;
+                    if (financialStatement.isMissingNode()) {
+                        System.out.println("financialStatement not found.");
+                    } else {
+                        System.out.println(financialStatement.toPrettyString());
                     }
-
                 } else {
-                    indicatorsMap.put("error", "Unable to get the stock index in trendlyne.");
-                    return indicatorsMap;
+                    System.out.println("__NEXT_DATA__ script tag not found.");
                 }
             } else {
-                indicatorsMap.put("error", "Request failed: " + response.code());
-                return indicatorsMap;
+                System.out.println("Request failed: " + response.code());
             }
         } catch (IOException e) {
             e.printStackTrace();
-            indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
-            return indicatorsMap;
         }
-
-    }
-
-    public String extractIndicatorUsingIndicatorName(Document document, String indicator) {
-
-        String regex = ":matchesOwn(^" + indicator + "$)";
-        Element current = document.selectFirst(regex);
-        if (current != null) {
-            // Get the next sibling element
-            Element next = current.nextElementSibling();
-            return next.text();
-        }
-        return indicator + " data is not found";
     }
 
 }

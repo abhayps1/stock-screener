@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { UpcomingIpoService } from '../ipo.service';
+import { UpcomingIpoService } from '../service/ipo.service';
 import { IpoDTO } from '../models/ipo-dto.model'; // ✅ Updated model import
 
 @Component({
