@@ -1,34 +1,45 @@
-<header class="navbar navbar-expand-lg navbar-light bg-light px-4 py-2 shadow-sm">
-  <a class="navbar-brand fw-bold text-primary" href="#">
-    Market<span class="text-success" style="font-weight:700;">Minds</span>
-  </a>
-  <div class="collapse navbar-collapse justify-content-center">
-    <ul class="navbar-nav gap-3">
-      <li class="nav-item">
-        <a routerLink="/stocks" routerLinkActive="active" class="nav-link">Sector Analysis</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/ipo" routerLinkActive="active" class="nav-link">IPO</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/news" routerLinkActive="active" class="nav-link">News</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/create" routerLinkActive="active" class="nav-link">Create</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/screeners" routerLinkActive="active" class="nav-link">Screeners</a>
-      </li>
-      <li class="nav-item">
-        <a routerLink="/insights" routerLinkActive="active" class="nav-link">Insights</a>
-      </li>
-    </ul>
-  </div>
-  <div class="d-flex gap-2">
+<nav class="sidebar">
+  <ul class="sidebar-nav">
+    <li>
+      <a routerLink="/Result" routerLinkActive="active" class="sidebar-link" title="Result">
+        <img src="assets/images/icons/sidebar/result.svg" alt="Result" />
+      </a>
+    </li>
+    <li>
+      <a routerLink="/stocks" routerLinkActive="active" class="sidebar-link" title="Sector Analysis">
+        <img src="assets/images/icons/sidebar/sector-analysis.svg" alt="Sector Analysis" />
+      </a>
+    </li>
+    <li>
+      <a routerLink="/ipo" routerLinkActive="active" class="sidebar-link" title="IPO">
+        <img src="assets/images/icons/sidebar/ipo.svg" alt="IPO" />
+      </a>
+    </li>
+    <li>
+      <a routerLink="/news" routerLinkActive="active" class="sidebar-link" title="News">
+        <img src="assets/images/icons/sidebar/news.svg" alt="News" />
+      </a>
+    </li>
+    <!-- <li>
+      <a routerLink="/screeners" routerLinkActive="active" class="sidebar-link" title="Screeners">
+        <img src="assets/images/icons/sidebar/screeners.svg" alt="Screeners" />
+      </a>
+    </li>
+    <li>
+      <a routerLink="/insights" routerLinkActive="active" class="sidebar-link" title="Insights">
+        <img src="assets/images/icons/sidebar/insights.svg" alt="Insights" />
+      </a>
+    </li> -->
+  </ul>
+
+  <!-- Commented out login buttons as per user request -->
+  <!--
+  <div class="sidebar-login-buttons">
     <button class="btn btn-outline-secondary">Login</button>
     <button class="btn btn-primary">Open Account</button>
   </div>
-</header>
+  -->
+</nav>
 
 <div class="container mt-4">
   <router-outlet></router-outlet>
