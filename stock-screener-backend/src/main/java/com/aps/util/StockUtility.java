@@ -3,7 +3,9 @@ package com.aps.util;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
@@ -11,6 +13,9 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
+
+import com.aps.entity.Results;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -20,6 +25,8 @@ import okhttp3.Response;
 public class StockUtility {
 
     private static final Logger logger = LoggerFactory.getLogger(StockUtility.class);
+
+    Results results = new Results();
 
     public String mapToString(HashMap<String, String> indicators) {
         String indicatorString = null;
@@ -120,6 +127,66 @@ public class StockUtility {
             return next.text();
         }
         return indicator + " data is not found";
+    }
+
+    public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
+        JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
+        JsonNode quarterlyProfit = financialData.get(1).get("quarterly");
+        JsonNode yearlyRevenue = financialData.get(0).get("yearly");
+        JsonNode yearlyProfit = financialData.get(1).get("yearly");
+        JsonNode yearlyNetworth = financialData.get(2).get("yearly");
+
+        double quarterlyRevenueCngPrcnt = getPercentageChange(quarterlyRevenue);
+        double quarterlyProfitCngPrcnt = getPercentageChange(quarterlyProfit);
+        double yearlyRevenueCngPrcnt = getPercentageChange(yearlyRevenue);
+        double yearlyProfitCngPrcnt = getPercentageChange(yearlyProfit);
+        double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
+        String latestQuarter = getLatestQuarter(quarterlyRevenue);
+
+        results.setStockName(searchId);
+        results.setQuarterlyRevenueCngPrcnt(quarterlyRevenueCngPrcnt);
+        results.setQuarterlyProfitCngPrcnt(quarterlyProfitCngPrcnt);
+        results.setYearlyRevenueCngPrcnt(yearlyRevenueCngPrcnt);
+        results.setYearlyProfitCngPrcnt(yearlyProfitCngPrcnt);
+        results.setYearlyNetworthCngPrcnt(yearlyNetworthCngPrcnt);
+        results.setResultDate(resultDate);
+        results.setLatestQuarter(latestQuarter);
+        return results;
+    }
+
+    public double getPercentageChange(JsonNode data) {
+        if(data == null || !data.isObject() || data.size() < 2) {
+            return 0; // Not enough data to calculate percentage change
+        }
+        Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+        double lastValue = 0, secondLastValue = 0;
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            // shift values as we iterate
+            secondLastValue = lastValue;
+            lastValue = entry.getValue().asDouble();
+        }
+
+        if(secondLastValue == 0) {
+            return 0; // Avoid division by zero
+        }
+        // calculate percentage change
+        double percentageChange = ((lastValue - secondLastValue) / Math.abs(secondLastValue)) * 100;
+        return percentageChange;
+
+    }
+
+    public String getLatestQuarter(JsonNode data) {
+        if(data == null || !data.isObject() || data.size() < 1) {
+            return "N/A"; // Not enough data to determine latest quarter
+        }
+        Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
+        String latestQuarter = "";
+        while (fields.hasNext()) {
+            Map.Entry<String, JsonNode> entry = fields.next();
+            latestQuarter = entry.getKey(); // Keep updating to get the last key
+        }
+        return latestQuarter;
     }
 
 }

@@ -65,18 +65,16 @@ public class StockController {
 	}
 
 	@GetMapping("/calendar")
-	public JSONObject getMethodName() {
+	public String getCalendarData() {
 		
 		logger.info("Fetching company results from calendar");
 		try {
-			JSONObject json = stockService.fetchCompanyResults();
+			String message = stockService.fetchCompanyResults();
 			logger.info("Successfully fetched company results from calendar");
-			return json;
+			return message;
 		} catch (Exception e) {
 			logger.error("Error occurred while fetching company results from calendar: {}", e.getMessage(), e);
-			JSONObject errorJson = new JSONObject();
-			errorJson.put("error", "Failed to fetch company results");
-			return errorJson;
+			return "Failed to fetch company results from events calendar.";
 		}
 	}
 

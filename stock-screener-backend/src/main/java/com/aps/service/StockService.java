@@ -16,7 +16,9 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.aps.entity.Results;
 import com.aps.entity.Stock;
+import com.aps.repository.ResultsRepository;
 import com.aps.repository.StockRepository;
 import com.aps.util.StockUtility;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -36,6 +38,9 @@ public class StockService {
     private StockRepository stockRepository;
 
     @Autowired
+    private ResultsRepository resultRepository;
+
+    @Autowired
     private StockUtility stockUtility;
 
     public List<Stock> fetchAllStocks() {
@@ -45,7 +50,7 @@ public class StockService {
     }
 
     public void saveStock(String referenceUrl) {
-        System.out.println("Saving stock with reference URL: " + referenceUrl);
+        logger.info("Saving stock with reference URL: {}", referenceUrl);
         referenceUrl = referenceUrl.replace("(", "").replace(")", "");
         String[] referenceUrlBreakDown = referenceUrl.split("/");
         String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
@@ -64,20 +69,19 @@ public class StockService {
         stock.setTrendlyneUrl(trendlyneUrl);
         stock.setIndicatorData(indicatorString);
         stock.setTrendlyneUniqueId(trendlyneUniqueId);
-        
+
         stockRepository.save(stock);
     }
 
     public void updateIndicatorData() {
         List<String> trendlyneUniqueIds = stockRepository.getAllTrendlyneUniqueId();
         logger.info("Updating indicator data for {} stocks", trendlyneUniqueIds.size());
-        
+
         for (String trendlyneUniqueId : trendlyneUniqueIds) {
             HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
             String indicatorString = stockUtility.mapToString(indicatorMap);
             stockRepository.updateIndicatorData(trendlyneUniqueId, indicatorString);
             logger.info("Updated indicator data for trendlyneUniqueId: {}", trendlyneUniqueId);
-            System.out.println("Updated indicator data for trendlyneUniqueId: " + trendlyneUniqueId);
         }
         logger.info("Indicator data update completed.");
     }
@@ -116,7 +120,7 @@ public class StockService {
 
     }
 
-    public JSONObject fetchCompanyResults() {
+    public String fetchCompanyResults() {
         // Implementation for fetching company results
         // This method will interact with the StockService to get stock data
         // and process it accordingly.
@@ -144,27 +148,29 @@ public class StockService {
             String arrayName = "exdateEvents";
             if (json.has(arrayName)) {
                 JSONArray events = json.getJSONArray(arrayName);
-                for (int i = 0; i < 1; i++) {
+                for (int i = 0; i < events.length(); i++) {
                     JSONObject event = events.getJSONObject(i);
                     if ("RESULTS".equals(event.optString("type"))) {
                         String searchId = event.optString("searchId");
                         JSONObject pill = event.optJSONObject("corporateEventPillDto");
-                        String primaryDate = pill != null ? pill.optString("primaryDate") : "";
-                        // System.out.println("searchId: " + searchId + ", primaryDate: " +
-                        // primaryDate);
-
-                        getFinancialStatement(searchId);
+                        String resultDate = pill != null ? pill.optString("primaryDate") : "";
+                        JsonNode financialData = getFinancialStatement(searchId);
+                        if (financialData == null) {
+                            continue;
+                        }
+                        Results result = stockUtility.formatAndSaveData(financialData, searchId, resultDate);
+                        resultRepository.save(result);
                     }
                 }
             }
-            return json;
+            return "Results is added to db successfully";
         } catch (Exception e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public void getFinancialStatement(String searchId) {
+    public JsonNode getFinancialStatement(String searchId) {
         String growwUrl = "https://groww.in/stocks/" + searchId;
         OkHttpClient client = new OkHttpClient();
 
@@ -188,18 +194,23 @@ public class StockService {
                             .path("financialStatement");
 
                     if (financialStatement.isMissingNode()) {
-                        System.out.println("financialStatement not found.");
+                        logger.warn("financialStatement not found.");
+                        return null;
                     } else {
-                        System.out.println(financialStatement.toPrettyString());
+                        logger.info("financialStatement fetched successfully.");
+                        return financialStatement;
                     }
                 } else {
-                    System.out.println("__NEXT_DATA__ script tag not found.");
+                    logger.warn("__NEXT_DATA__ script tag not found.");
+                    return null;
                 }
             } else {
-                System.out.println("Request failed: " + response.code());
+                logger.error("Request failed: {}", response.code());
+                return null;
             }
         } catch (IOException e) {
             e.printStackTrace();
+            return null;
         }
     }
 
