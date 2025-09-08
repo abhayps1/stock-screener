@@ -83,3 +83,6 @@ Auto (let OpenRouter pick the best free model) by providing this in request data
 - **Never commit your actual .env file** - it's already in .gitignore
 - **Never share your API key** - treat it like a password
 - **Use environment variables** in production deployments
+
+- **Get the list of BSE stocks from** - https://www.bseindia.com/corporates/List_Scrips.html
+- **Get the list of NSE stocks from** - https://www.nseindia.com/market-data/securities-available-for-trading
