@@ -8,13 +8,15 @@ import { AppComponent } from './app.component';
 import { AnnouncementsComponent } from './announcements/announcements.component';
 import { IpoListComponent } from './ipo-list/ipo-list.component';
 import { StocksComponent } from './stocks/stocks.component';
+import { ResultsComponent } from './results/results.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     AnnouncementsComponent,
     IpoListComponent,
-    StocksComponent
+    StocksComponent,
+    ResultsComponent
   ],
   imports: [
     BrowserModule,

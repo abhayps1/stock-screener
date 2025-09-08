@@ -1,5 +1,5 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
-import { StocksService } from '../service/stocks.service';
+import { StocksService } from '../services/stocks.service';
 import { Stock } from '../models/stock.model';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 
