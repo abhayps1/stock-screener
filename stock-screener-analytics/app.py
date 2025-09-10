@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
+from add_all_stocks import update_all_stocks_data
 
 # Load environment variables from .env file
 load_dotenv()
@@ -135,6 +136,18 @@ def generate_summary():
 #             "success": False,
 #             "error": str(e)
 #         }), 500
+
+
+@app.route('/update-all', methods=['POST'])
+def update_all_stocks():
+    """
+    Endpoint to trigger the update of all stocks data
+    """
+    try:
+        update_all_stocks_data()
+        return jsonify({"success": True, "message": "All stocks data updated successfully."})
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

@@ -5,77 +5,83 @@ import pandas as pd
 import numpy as np
 import sqlalchemy
 
-bse_df = pd.read_csv("files/BSE_all_stocks.csv")
-nse_df = pd.read_csv("files/NSE_all_stocks.csv")
-# print(bse_df.columns)
-# print(nse_df.columns)
 
-# # Check for null values in all columns for both dataframes
-# print("Null values in each column:")
-# print(bse_df.isnull().sum())
-# print(nse_df.isnull().sum())
+import requests
+import pandas as pd
+import io
 
-# # Remove null value rows from both dataframes if any exist
-# bse_df.dropna(inplace=True)
-# nse_df.dropna(inplace=True)
+def update_all_stocks_data():
 
-# Filter for only active stocks in BSE and for 'EQ' and 'BE' series in NSE
-bse_df = bse_df[bse_df['Status'] == 'Active']
-nse_df = nse_df[nse_df[' SERIES'].isin(['EQ', 'BE'])]                                                                                                                                                                                                              
+    bse_url = "https://api.bseindia.com/BseIndiaAPI/api/LitsOfScripCSVDownload/w?segment=Equity&status=&industry=&Group=&Scripcode="
+    bse_headers = {
+        "Referer": "https://www.bseindia.com/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
 
-# Identify common ISIN numbers in both DataFrames
-common_isin = set(bse_df['ISIN No']) & set(nse_df[' ISIN NUMBER'])
+    bse_response = requests.get(bse_url, headers=bse_headers)
+    bse_response.raise_for_status()
+    print("BSE stocks data downloaded successfully.")
 
-# Create a new dataframe called all_stocks_df with columns: Security Code, Symbol, Security Name, ISIN No, Industry Name, Listing Date
-selected_columns = ['Security Code', 'Security Id', 'Security Name', 'ISIN No', 'Industry New Name']
-all_stocks_df = bse_df[selected_columns].rename(columns={'Security Id': 'Symbol', 'Industry New Name': 'Industry Name'})
+    nse_url = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
+    nse_headers = {
+        "Referer": "https://www.nseindia.com/",
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+    }
 
-# Add another column called Listing Date from nse_df to all_stocks_df based on matching ISIN numbers
-all_stocks_df = all_stocks_df.merge(nse_df[[' ISIN NUMBER', ' DATE OF LISTING']], left_on='ISIN No', right_on=' ISIN NUMBER', how='left')
-all_stocks_df.drop(' ISIN NUMBER', axis=1, inplace=True)
-all_stocks_df.rename(columns={' DATE OF LISTING': 'Listing Date'}, inplace=True)
+    nse_response = requests.get(nse_url, headers=nse_headers)
+    nse_response.raise_for_status()
+    print("NSE stocks data downloaded successfully.")
 
-# Identify ISIN numbers in NSE but not in BSE
-unique_nse_isin = set(nse_df[' ISIN NUMBER']) - set(bse_df['ISIN No'])
-print(f"ISIN numbers in NSE but not in BSE: {len(unique_nse_isin)}")
+    bse_df = pd.read_csv(io.BytesIO(bse_response.content))
+    nse_df = pd.read_csv(io.BytesIO(nse_response.content))
 
-# Filter nse_df to only include rows with unique ISINs
-filtered_nse_df = nse_df[nse_df[' ISIN NUMBER'].isin(unique_nse_isin)]
+    # Filter for only active stocks in BSE and for 'EQ' and 'BE' series in NSE
+    bse_df = bse_df[bse_df['Status'] == 'Active']
+    nse_df = nse_df[nse_df[' SERIES'].isin(['EQ', 'BE'])]
 
-# Map columns for filtered_nse_df to match all_stocks_df
-mapped_nse_df = filtered_nse_df.rename(columns={
-    'SYMBOL': 'Symbol',
-    'NAME OF COMPANY': 'Security Name',
-    ' DATE OF LISTING': 'Listing Date',
-    ' ISIN NUMBER': 'ISIN No'
-})[['Symbol', 'Security Name', 'Listing Date', 'ISIN No']]
+    # Identify common ISIN numbers in both DataFrames
+    common_isin = set(bse_df['ISIN No']) & set(nse_df[' ISIN NUMBER'])
 
-# Add missing columns with NaN or appropriate default values
-mapped_nse_df['Security Code'] = np.nan
-mapped_nse_df['Industry Name'] = np.nan
+    # Create a new dataframe called all_stocks_df with columns: Security Code, Symbol, Security Name, ISIN No, Industry Name, Listing Date
+    selected_columns = ['Security Code', 'Security Id', 'Security Name', 'ISIN No', 'Industry New Name', 'Group']
+    all_stocks_df = bse_df[selected_columns].rename(columns={'Security Code' : 'security_code', 'Security Id': 'symbol', 'Security Name' : 'name','ISIN No' : 'isin',  'Industry New Name': 'industry', 'Group': 'group'})
 
-# Reorder columns to match all_stocks_df
-mapped_nse_df = mapped_nse_df[['Security Code', 'Symbol', 'Security Name', 'ISIN No', 'Industry Name', 'Listing Date']]
+    # Add another column called Listing Date from nse_df to all_stocks_df based on matching ISIN numbers
+    all_stocks_df = all_stocks_df.merge(nse_df[[' ISIN NUMBER', ' DATE OF LISTING']], left_on='isin', right_on=' ISIN NUMBER', how='left')
+    all_stocks_df.drop(' ISIN NUMBER', axis=1, inplace=True)
+    all_stocks_df.rename(columns={' DATE OF LISTING': 'listing_date'}, inplace=True)
 
-# Concatenate with all_stocks_df
-all_stocks_df = pd.concat([all_stocks_df, mapped_nse_df], ignore_index=True)
+    # Identify ISIN numbers in NSE but not in BSE
+    unique_nse_isin = set(nse_df[' ISIN NUMBER']) - set(bse_df['ISIN No'])
 
-# Create Endpoint Url column
-all_stocks_df['Endpoint Url'] = all_stocks_df['Security Name'].str.lower().str.replace(' ', '-').str.replace('(', '').str.replace(')', '').str.replace('limited', 'ltd').str.replace(',', '').str.replace('&', '').str.replace('__', '-').str.replace('---', '-').str.replace('--', '-')
+    # Filter nse_df to only include rows with unique ISINs
+    filtered_nse_df = nse_df[nse_df[' ISIN NUMBER'].isin(unique_nse_isin)]
 
-# Create Screener Url column
-all_stocks_df['Screener Url'] = all_stocks_df.apply(
-    lambda row: f"https://www.screener.in/company/{int(row['Security Code'])}/consolidated/" if pd.notnull(row['Security Code']) else f"https://www.screener.in/company/{row['Symbol']}/consolidated/",
-    axis=1
-)
+    # Map columns for filtered_nse_df to match all_stocks_df
+    mapped_nse_df = filtered_nse_df.rename(columns={
+        'SYMBOL': 'symbol',
+        'NAME OF COMPANY': 'name',
+        ' DATE OF LISTING': 'listing_date',
+        ' ISIN NUMBER': 'isin'
+    })[['symbol', 'name', 'listing_date', 'isin']]
 
-# Create Groww Url column
-all_stocks_df['Groww Url'] = 'https://groww.in/stocks/' + all_stocks_df['Endpoint Url']
+    # Add missing columns with NaN or appropriate default values
+    mapped_nse_df['security_code'] = np.nan
+    mapped_nse_df['industry'] = np.nan
+    mapped_nse_df['group'] = np.nan
 
-# Create Trendlyne Url column
-all_stocks_df['Trendlyne Url'] = 'https://trendlyne.com/equity/' + all_stocks_df['Symbol'].str.lower() + '/' + all_stocks_df['Endpoint Url']
+    # Reorder columns to match all_stocks_df
+    mapped_nse_df = mapped_nse_df[['security_code', 'symbol', 'name', 'isin', 'industry', 'group',
+        'listing_date']]
 
+    # Concatenate with all_stocks_df
+    all_stocks_df = pd.concat([all_stocks_df, mapped_nse_df], ignore_index=True)
 
-# Save the updated all_stocks_df to database
-engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')
-all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)
+    # Create Endpoint column
+    all_stocks_df['endpoint'] = all_stocks_df['name'].str.lower().str.replace(' ', '-').str.replace('(', '').str.replace(')', '').str.replace('limited', 'ltd').str.replace(',', '').str.replace('&', '').str.replace('__', '-').str.replace('---', '-').str.replace('--', '-').str.replace('-$', '')
+
+    # Save the updated all_stocks_df to database
+    engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')
+    all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)
+    print("All stocks data updated and saved to database successfully.")
+
