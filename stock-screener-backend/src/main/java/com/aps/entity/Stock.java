@@ -10,10 +10,13 @@ import lombok.Data;
 @Table(name = "stocks")
 @Data
 public class Stock {
+	private String name;
 
 	@Id
 	@Column(nullable = false, unique = true)
-	private String stockName;
+	private String symbol;
+
+	private String securityCode;
 
 	private String growwUrl;
 

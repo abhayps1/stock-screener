@@ -80,6 +80,9 @@ def update_all_stocks_data():
     # Create Endpoint column
     all_stocks_df['endpoint'] = all_stocks_df['name'].str.lower().str.replace(' ', '-').str.replace('(', '').str.replace(')', '').str.replace('limited', 'ltd').str.replace(',', '').str.replace('&', '').str.replace('__', '-').str.replace('---', '-').str.replace('--', '-').str.replace('-$', '')
 
+    # Convert security_code to string without .0
+    all_stocks_df['security_code'] = all_stocks_df['security_code'].astype(str).str.replace('.0', '', regex=False)
+
     # Save the updated all_stocks_df to database
     engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')
     all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)

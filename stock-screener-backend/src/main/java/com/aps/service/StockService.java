@@ -16,9 +16,11 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.aps.dto.SearchedStockDto;
 import com.aps.entity.Results;
 import com.aps.entity.Stock;
 import com.aps.repository.ResultsRepository;
+import com.aps.repository.SearchingRepository;
 import com.aps.repository.StockRepository;
 import com.aps.util.StockUtility;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -43,27 +45,37 @@ public class StockService {
     @Autowired
     private StockUtility stockUtility;
 
+    @Autowired
+    private SearchingRepository searchingRepository;
+
     public List<Stock> fetchAllStocks() {
         List<Stock> stocks = stockRepository.findAll();
         logger.info("Fetched {} stocks from the database.", stocks.size());
         return stocks;
     }
 
-    public void saveStock(String referenceUrl) {
-        logger.info("Saving stock with reference URL: {}", referenceUrl);
-        referenceUrl = referenceUrl.replace("(", "").replace(")", "");
-        String[] referenceUrlBreakDown = referenceUrl.split("/");
-        String growwUrl = "https://groww.in/stocks/" + referenceUrlBreakDown[2];
-        String trendlyneUrl = "https://trendlyne.com/equity/" + referenceUrlBreakDown[3] + "/"
-                + referenceUrlBreakDown[2];
-        String screenerUrl = "https://www.screener.in/company/" + referenceUrlBreakDown[4] + "/consolidated";
+    public String saveStock(SearchedStockDto searchedStockDto) {
+        String securityCode = searchedStockDto.getSecurityCode();
+        String symbol = searchedStockDto.getSymbol().toLowerCase();
+        String name = searchedStockDto.getName();
+        String endpoint = searchedStockDto.getEndpoint();
+        String screenerUrl = null;
 
+        if(null != securityCode)
+        screenerUrl = "https://www.screener.in/company/" + securityCode + "/consolidated";
+        else
+        screenerUrl = "https://www.screener.in/company/" + symbol + "/consolidated";
+        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol+'/'+endpoint;
+        
+        String growwUrl = "https://groww.in/stocks/" + endpoint;
         String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
         HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
         String indicatorString = stockUtility.mapToString(indicatorMap);
 
         Stock stock = new Stock();
-        stock.setStockName(referenceUrlBreakDown[2]);
+        stock.setName(name);
+        stock.setSymbol(symbol);
+        stock.setSecurityCode(securityCode);
         stock.setGrowwUrl(growwUrl);
         stock.setScreenerUrl(screenerUrl);
         stock.setTrendlyneUrl(trendlyneUrl);
@@ -71,6 +83,7 @@ public class StockService {
         stock.setTrendlyneUniqueId(trendlyneUniqueId);
 
         stockRepository.save(stock);
+        return name+" is saved successfully";
     }
 
     public void updateIndicatorData() {
@@ -212,6 +225,13 @@ public class StockService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    public List<SearchedStockDto> searchFromAllStocks(String companyTerm) {
+        if (companyTerm == null || companyTerm.trim().isEmpty()) {
+            return List.of();
+        }
+        return searchingRepository.searchFromAllStocks(companyTerm);
     }
 
 }

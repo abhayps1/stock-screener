@@ -9,20 +9,23 @@ import { AnnouncementsComponent } from './announcements/announcements.component'
 import { IpoListComponent } from './ipo-list/ipo-list.component';
 import { StocksComponent } from './stocks/stocks.component';
 import { ResultsComponent } from './results/results.component';
-
+import { SearchComponent } from './search/search.component';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 @NgModule({
   declarations: [
     AppComponent,
     AnnouncementsComponent,
     IpoListComponent,
     StocksComponent,
-    ResultsComponent
+    ResultsComponent,
+    SearchComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
-    FormsModule
+    FormsModule,
+    BrowserAnimationsModule
   ],
   providers: [],
   bootstrap: [AppComponent]
