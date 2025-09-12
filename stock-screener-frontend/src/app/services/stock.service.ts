@@ -18,12 +18,12 @@ export class StockService {
 
   constructor(private http: HttpClient) { }
 
-  // getStocks(): Observable<Stock[]> {
-  //   return this.http.get<Stock[]>(this.getAllStocksUrl);
-  // }
+  getStocks(): Observable<Stock[]> {
+    return this.http.get<Stock[]>(this.getAllStocksUrl);
+  }
 
   addStock(stock: SearchedStock): Observable<any> {
-    return this.http.post(`${this.stockUrl}/add`, stock);
+    return this.http.post(`${this.stockUrl}/add`, stock, { responseType: 'text' });
   }
 
   // searchStocks(companyTerm: string): Observable<string> {

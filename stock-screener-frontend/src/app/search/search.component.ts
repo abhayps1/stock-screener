@@ -15,6 +15,7 @@ export class SearchComponent implements OnInit, OnDestroy {
   searchTerm: string = '';
   stocks: SearchedStock[] = [];
   filteredStocks: SearchedStock[] = [];
+  showResults: boolean = false;
   private searchSubject = new Subject<string>();
   private subscription: Subscription = new Subscription();
 
@@ -24,8 +25,8 @@ export class SearchComponent implements OnInit, OnDestroy {
     this.filteredStocks = this.stocks;
 
     this.subscription = this.searchSubject.pipe(
-      debounceTime(500), // Wait 1 second after user stops typing
-      distinctUntilChanged(), // Only emit if value has changed
+      debounceTime(500),
+      distinctUntilChanged(),
       switchMap(term => {
         if (term.trim()) {
           return this.searchService.searchStocks(term).pipe(
@@ -40,6 +41,7 @@ export class SearchComponent implements OnInit, OnDestroy {
       })
     ).subscribe(results => {
       this.filteredStocks = results;
+      this.showResults = results.length > 0;
     });
   }
 
@@ -49,5 +51,12 @@ export class SearchComponent implements OnInit, OnDestroy {
 
   onSearch(): void {
     this.searchSubject.next(this.searchTerm);
+  }
+
+  clearAndCollapse(): void {
+    console.log('Clearing search input and collapsing results');
+    this.searchTerm = '';
+    this.filteredStocks = [];
+    this.showResults = false;
   }
 }
