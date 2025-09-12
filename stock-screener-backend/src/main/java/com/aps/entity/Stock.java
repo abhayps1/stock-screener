@@ -27,4 +27,6 @@ public class Stock {
 	private String indicatorData;
 
 	private String trendlyneUniqueId;
+
+	private String endpoint;
 }

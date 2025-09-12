@@ -1,38 +1,45 @@
-<app-search></app-search>
+<app-search (stockSelected)="onStockSelected($event)"></app-search>
 
 <!-- <div class="mb-5">
-    <table class="table table-bordered table-striped">
-        <thead>
-            <tr>
-                <th>Company Name</th>
-                <th>RSI</th>
-                <th>MFI</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr *ngFor="let stock of stocks">
-                <td class="position-relative stock-hover-group">
-                    <div (mouseenter)="hoveredStock = stock" (mouseleave)="hoveredStock = null"
-                        style="display: inline-block; position: relative;">
-                        <span class="stock-name-hover">
-                            {{ stock.stockName }}
-                        </span>
-                        <div class="stock-url-popup" *ngIf="hoveredStock === stock">
-                            <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" target="_blank" title="Groww">
-                                <img src="assets/images/icons/groww.svg" alt="Groww" width="28" height="28" />
-                            </a>
-                            <a *ngIf="stock.screenerUrl" [href]="stock.screenerUrl" target="_blank" title="Screener">
-                                <img src="assets/images/icons/screener.svg" alt="Screener" width="28" height="28" />
-                            </a>
-                            <a *ngIf="stock.trendlyneUrl" [href]="stock.trendlyneUrl" target="_blank" title="Trendlyne">
-                                <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="28" height="28" />
-                            </a>
-                        </div>
-                    </div>
-                </td>
-                <td>{{ stock.rsi || 'N/A' }}</td>
-                <td>{{ stock.mfi || 'N/A' }}</td>
-            </tr>
-        </tbody>
-    </table>
+  <table class="table table-dark table-striped table-hover">
+    <thead>
+      <tr>
+        <th><input type="checkbox" /></th>
+        <th>STRATEGY</th>
+        <th>TIMEPLAY</th>
+        <th>SYMBOL</th>
+        <th>RECENT VALUE</th>
+        <th>ALERT</th>
+        <th>SIGNAL DT</th>
+        <th>STATUS</th>
+        <th>ENTRY</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stock of stocks">
+        <td><input type="checkbox" /></td>
+        <td>{{ stock.strategy || 'N/A' }}</td>
+        <td>{{ stock.timeplay || 'N/A' }}</td>
+        <td>
+          <a href="#" class="text-primary font-weight-bold">{{ stock.symbol || stock.stockName }}</a>
+        </td>
+        <td>{{ stock.recentValue || 'N/A' }}</td>
+        <td [ngClass]="{'text-success': stock.alert === 'LONG', 'text-danger': stock.alert === 'SHORT'}">
+          {{ stock.alert || 'N/A' }}
+        </td>
+        <td>{{ stock.signalDt || 'N/A' }}</td>
+        <td>
+          <span [ngClass]="{
+            'text-primary': stock.status === 'ACTIVE',
+            'text-danger': stock.status === 'SL MET',
+            'text-success': stock.status === 'T3 MET' || stock.status === 'T2 MET',
+            'text-secondary': stock.status === 'EXIT'
+          }">
+            {{ stock.status || 'N/A' }}
+          </span>
+        </td>
+        <td>{{ stock.entry || 'N/A' }}</td>
+      </tr>
+    </tbody>
+  </table>
 </div> -->

@@ -81,6 +81,7 @@ public class StockService {
         stock.setTrendlyneUrl(trendlyneUrl);
         stock.setIndicatorData(indicatorString);
         stock.setTrendlyneUniqueId(trendlyneUniqueId);
+        stock.setEndpoint(endpoint);
 
         stockRepository.save(stock);
         return name+" is saved successfully";
