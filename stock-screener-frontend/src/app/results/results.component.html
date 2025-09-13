@@ -1,1 +1,28 @@
-<p>results works!</p>
+<div class="mb-5">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th>Stock Name</th>
+                <th>Result Date</th>
+                <th>Latest Quarter</th>
+                <th>QRC</th>
+                <th>QPC</th>
+                <th>YRC</th>
+                <th>YPC</th>
+                <th>YNC</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let result of results">
+                <td>{{ result.stockName || 'N/A' }}</td>
+                <td>{{ result.resultDate | date:'dd-MM-yyyy' }}</td>
+                <td>{{ result.latestQuarter || 'N/A' }}</td>
+                <td>{{ result.quarterlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td>{{ result.quarterlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td>{{ result.yearlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td>{{ result.yearlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td>{{ result.yearlyNetworthCngPrcnt | number:'1.2-2' }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>

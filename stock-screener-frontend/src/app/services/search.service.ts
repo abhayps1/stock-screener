@@ -10,7 +10,7 @@ import { SearchedStock } from '../models/searched-stock.model';
 export class SearchService {
 
   private backendUrl = environment.backendUrl+ '/api/stock';
-  private searchUrl = this.backendUrl+'/searchAllStocks';
+  private searchUrl = this.backendUrl+'/search';
 
   constructor(private http: HttpClient) { }
 

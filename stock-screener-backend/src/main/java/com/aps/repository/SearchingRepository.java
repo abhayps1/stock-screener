@@ -15,7 +15,7 @@ public class SearchingRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public List<SearchedStockDto> searchFromAllStocks(String term) {
+    public List<SearchedStockDto> searchStock(String term) {
         String sql = """
             SELECT security_code, symbol, name, endpoint 
             FROM all_stocks

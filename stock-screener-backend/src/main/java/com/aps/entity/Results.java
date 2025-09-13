@@ -1,5 +1,7 @@
 package com.aps.entity;
 
+import java.sql.Date;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -19,7 +21,7 @@ public class Results {
     // private String yearlyRevenue;
     // private String yearlyProfit;
     // private String yearlyNetworth;
-    private String resultDate;
+    private Date resultDate;
     private String latestQuarter;
     private double quarterlyRevenueCngPrcnt;
     private double quarterlyProfitCngPrcnt;

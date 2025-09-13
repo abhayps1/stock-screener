@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aps.dto.SearchedStockDto;
+import com.aps.entity.Results;
 import com.aps.entity.Stock;
 import com.aps.service.StockService;
 
@@ -26,20 +27,6 @@ public class StockController {
 
 	@Autowired
 	private StockService stockService;
-
-	@GetMapping("/search")
-	public ResponseEntity<String> searchStock(@RequestParam String companyTerm) {
-		logger.info("Searching for the term: {}", companyTerm);
-		
-		if (companyTerm == null || companyTerm.trim().isEmpty()) {
-			logger.warn("Stock name is null or empty");
-			return ResponseEntity.badRequest().body("Stock name is mandatory.");
-		}
-		
-		String result = stockService.searchStock(companyTerm);
-		// logger.info("Search completed successfully for term: {}", companyTerm);
-		return ResponseEntity.ok(result);
-	}
 
 	// Get all stocks
 	@GetMapping("/allStocks")
@@ -65,19 +52,34 @@ public class StockController {
 		return stockService.saveStock(searchedStockDto);
 	}
 
-	@GetMapping("/calendar")
-	public String getCalendarData() {
+	@PostMapping("/fetchResults")
+	public String fetchResults() {
 		
 		logger.info("Fetching company results from calendar");
 		try {
-			String message = stockService.fetchCompanyResults();
-			logger.info("Successfully fetched company results from calendar");
+			String message = stockService.fetchResults();
+			logger.info("Successfully fetched all results");
 			return message;
 		} catch (Exception e) {
-			logger.error("Error occurred while fetching company results from calendar: {}", e.getMessage(), e);
-			return "Failed to fetch company results from events calendar.";
+			logger.error("Error occurred while fetching company results: {}", e.getMessage(), e);
+			return "Failed to fetch company results.";
 		}
 	}
+
+
+	@GetMapping("/getResults")
+	public List<Results> getResults() {
+		logger.info("Getting company results from database");
+		try {
+			List<Results> results = stockService.getResults();
+			logger.info("Successfully got all results");
+			return results;
+		} catch (Exception e) {
+			logger.error("Error occurred while getting company results: {}", e.getMessage(), e);
+			return null;
+		}
+	}
+	
 
 	@GetMapping("/updateIndicatorData")
 	public void updateIndicatorData() {
@@ -85,9 +87,9 @@ public class StockController {
 		stockService.updateIndicatorData();
 	}
 
-	@GetMapping("/searchAllStocks")
-	public List<SearchedStockDto> searchAllStocks(@RequestParam String companyTerm) {
-		return stockService.searchFromAllStocks(companyTerm);
+	@GetMapping("/search")
+	public List<SearchedStockDto> searchStock(@RequestParam String companyTerm) {
+		return stockService.searchStock(companyTerm);
 	}
 
 }

@@ -1,6 +1,8 @@
+
 package com.aps.util;
 
 import java.io.IOException;
+import java.sql.Date;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,6 +131,50 @@ public class StockUtility {
         return indicator + " data is not found";
     }
 
+    public JsonNode getStockFinancialStatement(String searchId) {
+        String growwUrl = "https://groww.in/stocks/" + searchId;
+        OkHttpClient client = new OkHttpClient();
+
+        Request request = new Request.Builder().url(growwUrl).build();
+
+        try (Response response = client.newCall(request).execute()) {
+            if (response.isSuccessful() && response.body() != null) {
+                String responseData = response.body().string();
+
+                // Parse HTML and extract JSON from __NEXT_DATA__ script tag
+                Document doc = Jsoup.parse(responseData);
+                Element nextDataScript = doc.getElementById("__NEXT_DATA__");
+                if (nextDataScript != null) {
+                    String jsonData = nextDataScript.html();
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode root = mapper.readTree(jsonData);
+                    JsonNode financialStatement = root
+                            .path("props")
+                            .path("pageProps")
+                            .path("stockData")
+                            .path("financialStatement");
+
+                    if (financialStatement.isMissingNode()) {
+                        logger.warn("financialStatement not found.");
+                        return null;
+                    } else {
+                        logger.info("financialStatement fetched successfully.");
+                        return financialStatement;
+                    }
+                } else {
+                    logger.warn("__NEXT_DATA__ script tag not found.");
+                    return null;
+                }
+            } else {
+                logger.error("Request failed: {}", response.code());
+                return null;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
         JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
         JsonNode quarterlyProfit = financialData.get(1).get("quarterly");
@@ -149,13 +195,13 @@ public class StockUtility {
         results.setYearlyRevenueCngPrcnt(yearlyRevenueCngPrcnt);
         results.setYearlyProfitCngPrcnt(yearlyProfitCngPrcnt);
         results.setYearlyNetworthCngPrcnt(yearlyNetworthCngPrcnt);
-        results.setResultDate(resultDate);
+        results.setResultDate(Date.valueOf(resultDate));
         results.setLatestQuarter(latestQuarter);
         return results;
     }
 
     public double getPercentageChange(JsonNode data) {
-        if(data == null || !data.isObject() || data.size() < 2) {
+        if (data == null || !data.isObject() || data.size() < 2) {
             return 0; // Not enough data to calculate percentage change
         }
         Iterator<Map.Entry<String, JsonNode>> fields = data.fields();
@@ -167,7 +213,7 @@ public class StockUtility {
             lastValue = entry.getValue().asDouble();
         }
 
-        if(secondLastValue == 0) {
+        if (secondLastValue == 0) {
             return 0; // Avoid division by zero
         }
         // calculate percentage change
@@ -177,7 +223,7 @@ public class StockUtility {
     }
 
     public String getLatestQuarter(JsonNode data) {
-        if(data == null || !data.isObject() || data.size() < 1) {
+        if (data == null || !data.isObject() || data.size() < 1) {
             return "N/A"; // Not enough data to determine latest quarter
         }
         Iterator<Map.Entry<String, JsonNode>> fields = data.fields();

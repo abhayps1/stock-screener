@@ -40,13 +40,20 @@ public class StockService {
     private StockRepository stockRepository;
 
     @Autowired
-    private ResultsRepository resultRepository;
+    private ResultsRepository resultsRepository;
 
     @Autowired
     private StockUtility stockUtility;
 
     @Autowired
     private SearchingRepository searchingRepository;
+
+    public List<SearchedStockDto> searchStock(String companyTerm) {
+        if (companyTerm == null || companyTerm.trim().isEmpty()) {
+            return List.of();
+        }
+        return searchingRepository.searchStock(companyTerm);
+    }
 
     public List<Stock> fetchAllStocks() {
         List<Stock> stocks = stockRepository.findAll();
@@ -55,8 +62,12 @@ public class StockService {
     }
 
     public String saveStock(SearchedStockDto searchedStockDto) {
+        // Check if stock already exists in the database
+        if (stockRepository.existsById(searchedStockDto.getSymbol())) {
+            return searchedStockDto.getName() + " already exists in the database.";
+        }
         String securityCode = searchedStockDto.getSecurityCode();
-        String symbol = searchedStockDto.getSymbol().toLowerCase();
+        String symbol = searchedStockDto.getSymbol();
         String name = searchedStockDto.getName();
         String endpoint = searchedStockDto.getEndpoint();
         String screenerUrl = null;
@@ -64,8 +75,8 @@ public class StockService {
         if(null != securityCode)
         screenerUrl = "https://www.screener.in/company/" + securityCode + "/consolidated";
         else
-        screenerUrl = "https://www.screener.in/company/" + symbol + "/consolidated";
-        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol+'/'+endpoint;
+        screenerUrl = "https://www.screener.in/company/" + symbol.toLowerCase() + "/consolidated";
+        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol.toLowerCase()+'/'+endpoint;
         
         String growwUrl = "https://groww.in/stocks/" + endpoint;
         String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
@@ -100,53 +111,15 @@ public class StockService {
         logger.info("Indicator data update completed.");
     }
 
-    public String searchStock(String companyTerm) {
-        OkHttpClient client = new OkHttpClient();
-
-        HttpUrl url = new HttpUrl.Builder()
-                .scheme("https")
-                .host("api.bseindia.com")
-                .addPathSegments("Msource/1D/getQouteSearch.aspx")
-                .addQueryParameter("Type", "EQ")
-                .addQueryParameter("text", companyTerm)
-                .addQueryParameter("flag", "site")
-                .build();
-
-        Request request = new Request.Builder()
-                .url(url)
-                .addHeader("sec-ch-ua-platform", "\"Windows\"")
-                .addHeader("Referer", "https://www.bseindia.com/")
-                .addHeader("User-Agent",
-                        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/138.0.0.0 Safari/537.36")
-                .addHeader("Accept", "application/json, text/plain, */*")
-                .addHeader("sec-ch-ua", "\"Not)A;Brand\";v=\"8\", \"Chromium\";v=\"138\", \"Google Chrome\";v=\"138\"")
-                .addHeader("sec-ch-ua-mobile", "?0")
-                .build();
-
-        Response response;
-        try {
-            response = client.newCall(request).execute();
-            return response.body().string();
-        } catch (IOException e) {
-
-            return "<h6>Request failed</h6>";
-        }
-
-    }
-
-    public String fetchCompanyResults() {
-        // Implementation for fetching company results
-        // This method will interact with the StockService to get stock data
-        // and process it accordingly.
-
+    public String fetchResults() {
         try {
             OkHttpClient client = new OkHttpClient();
 
-            String today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE);
-            String threeDaysBefore = LocalDate.now().minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String dateFrom = LocalDate.now().minusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String dateTo = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             String url = "https://groww.in/v1/api/stocks_data/equity_feature/v2/corporate_action/event?from="
-                    + threeDaysBefore + "&to=" + today;
+                    + dateFrom + "&to=" + dateTo;
 
             // Step 1: Make HTTP GET request
             Request request = new Request.Builder().url(url)
@@ -168,12 +141,12 @@ public class StockService {
                         String searchId = event.optString("searchId");
                         JSONObject pill = event.optJSONObject("corporateEventPillDto");
                         String resultDate = pill != null ? pill.optString("primaryDate") : "";
-                        JsonNode financialData = getFinancialStatement(searchId);
+                        JsonNode financialData = stockUtility.getStockFinancialStatement(searchId);
                         if (financialData == null) {
                             continue;
                         }
                         Results result = stockUtility.formatAndSaveData(financialData, searchId, resultDate);
-                        resultRepository.save(result);
+                        resultsRepository.save(result);
                     }
                 }
             }
@@ -184,55 +157,12 @@ public class StockService {
         return null;
     }
 
-    public JsonNode getFinancialStatement(String searchId) {
-        String growwUrl = "https://groww.in/stocks/" + searchId;
-        OkHttpClient client = new OkHttpClient();
-
-        Request request = new Request.Builder().url(growwUrl).build();
-
-        try (Response response = client.newCall(request).execute()) {
-            if (response.isSuccessful() && response.body() != null) {
-                String responseData = response.body().string();
-
-                // Parse HTML and extract JSON from __NEXT_DATA__ script tag
-                Document doc = Jsoup.parse(responseData);
-                Element nextDataScript = doc.getElementById("__NEXT_DATA__");
-                if (nextDataScript != null) {
-                    String jsonData = nextDataScript.html();
-                    ObjectMapper mapper = new ObjectMapper();
-                    JsonNode root = mapper.readTree(jsonData);
-                    JsonNode financialStatement = root
-                            .path("props")
-                            .path("pageProps")
-                            .path("stockData")
-                            .path("financialStatement");
-
-                    if (financialStatement.isMissingNode()) {
-                        logger.warn("financialStatement not found.");
-                        return null;
-                    } else {
-                        logger.info("financialStatement fetched successfully.");
-                        return financialStatement;
-                    }
-                } else {
-                    logger.warn("__NEXT_DATA__ script tag not found.");
-                    return null;
-                }
-            } else {
-                logger.error("Request failed: {}", response.code());
-                return null;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public List<Results> getResults() {
+        return resultsRepository.findAll();
     }
 
-    public List<SearchedStockDto> searchFromAllStocks(String companyTerm) {
-        if (companyTerm == null || companyTerm.trim().isEmpty()) {
-            return List.of();
-        }
-        return searchingRepository.searchFromAllStocks(companyTerm);
-    }
+    
+
+    
 
 }

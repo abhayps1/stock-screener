@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 import { Stock } from '../models/stock.model';
 import { environment } from '../../environments/environment';
 import { SearchedStock } from '../models/searched-stock.model';
+import { Result } from '../models/result.model';
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +16,7 @@ export class StockService {
   private addUrl = this.stockUrl+'/add';
   private searchUrl = this.stockUrl+'/search';
   private refreshIndicatorsUrl = this.stockUrl+'/updateIndicatorData';
+  private getResultsUrl = this.stockUrl + '/getResults';
 
   constructor(private http: HttpClient) { }
 
@@ -26,13 +28,11 @@ export class StockService {
     return this.http.post(`${this.stockUrl}/add`, stock, { responseType: 'text' });
   }
 
-  // searchStocks(companyTerm: string): Observable<string> {
-  //   return this.http.get(`${this.searchUrl}?companyTerm=${encodeURIComponent(companyTerm)}`, { responseType: 'text' });
-  // }
-
   updateIndicatorData() {
     return this.http.get(this.refreshIndicatorsUrl, { responseType: 'text' });
   }
 
-  
+  getAllResults(): Observable<Result[]> {
+    return this.http.get<Result[]>(this.getResultsUrl);
+  }
 }
