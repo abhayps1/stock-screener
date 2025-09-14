@@ -17,11 +17,11 @@
                 <td>{{ result.stockName || 'N/A' }}</td>
                 <td>{{ result.resultDate | date:'dd-MM-yyyy' }}</td>
                 <td>{{ result.latestQuarter || 'N/A' }}</td>
-                <td>{{ result.quarterlyRevenueCngPrcnt | number:'1.2-2' }}</td>
-                <td>{{ result.quarterlyProfitCngPrcnt | number:'1.2-2' }}</td>
-                <td>{{ result.yearlyRevenueCngPrcnt | number:'1.2-2' }}</td>
-                <td>{{ result.yearlyProfitCngPrcnt | number:'1.2-2' }}</td>
-                <td>{{ result.yearlyNetworthCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.quarterlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.quarterlyProfitCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyProfitCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyNetworthCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyNetworthCngPrcnt | number:'1.2-2' }}</td>
             </tr>
         </tbody>
     </table>

@@ -1,6 +1,5 @@
 package com.aps.service;
 
-import java.io.IOException;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
@@ -8,9 +7,6 @@ import java.util.List;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Document;
-import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +20,6 @@ import com.aps.repository.SearchingRepository;
 import com.aps.repository.StockRepository;
 import com.aps.util.StockUtility;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-
-import okhttp3.HttpUrl;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.Response;
@@ -72,12 +65,12 @@ public class StockService {
         String endpoint = searchedStockDto.getEndpoint();
         String screenerUrl = null;
 
-        if(null != securityCode)
-        screenerUrl = "https://www.screener.in/company/" + securityCode + "/consolidated";
+        if (null != securityCode)
+            screenerUrl = "https://www.screener.in/company/" + securityCode + "/consolidated";
         else
-        screenerUrl = "https://www.screener.in/company/" + symbol.toLowerCase() + "/consolidated";
-        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol.toLowerCase()+'/'+endpoint;
-        
+            screenerUrl = "https://www.screener.in/company/" + symbol.toLowerCase() + "/consolidated";
+        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol.toLowerCase() + '/' + endpoint;
+
         String growwUrl = "https://groww.in/stocks/" + endpoint;
         String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
         HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
@@ -95,7 +88,7 @@ public class StockService {
         stock.setEndpoint(endpoint);
 
         stockRepository.save(stock);
-        return name+" is saved successfully";
+        return name + " is saved successfully";
     }
 
     public void updateIndicatorData() {
@@ -160,9 +153,5 @@ public class StockService {
     public List<Results> getResults() {
         return resultsRepository.findAll();
     }
-
-    
-
-    
 
 }

@@ -22,18 +22,26 @@ client = OpenAI(
     api_key=api_key,
 )
 
-@app.route("/generate-summary", methods=["POST"])
+@app.route("/screener-summary", methods=["GET"])
 def generate_summary():
     try:
         
-        prompts = os.getenv('PROMPTS')
-        
+        prompt = '''You are a data extraction assistant.  
+            Your task is to fetch the EXACT text from the "About" section of a company's page on Screener.in.  
+
+            Steps:  
+            1. Go to https://www.screener.in/ and search for the company using its name or stock symbol.  
+            2. Find the "About" section.  
+            3. Return the text EXACTLY as it appears on the page — no rephrasing, no summarizing, no interpretation.  
+            4. Do not include any extra commentary or formatting.  
+            5. Only output the raw text. '''
+
         # Call OpenRouter AI
         response = client.chat.completions.create(
             model="openai/gpt-4o-mini",  # You can change the model if needed
             messages=[
-                {"role": "system", "content": "You are an AI that generates useful summaries."},
-                {"role": "user", "content": prompts},
+                {"role": "system", "content": "You are a data extractor with access to the web. Fetch exact data from websites."},
+                {"role": "user", "content": "Search Screener.in for company RELIANCE and extract the exact 'About' section text."},
             ],
         )
 
