@@ -137,7 +137,8 @@ public class StockService {
                             continue;
                         }
                         Results result = stockUtility.formatAndSaveData(financialData, searchId, resultDate);
-                        resultsRepository.save(result);
+                        if(result != null)
+                            resultsRepository.save(result);
                     }
                 }
             }

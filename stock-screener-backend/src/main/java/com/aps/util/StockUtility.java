@@ -19,7 +19,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
+import com.aps.dto.SearchedStockDto;
 import com.aps.entity.Results;
+import com.aps.repository.SearchingRepository;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import okhttp3.OkHttpClient;
@@ -32,7 +34,7 @@ public class StockUtility {
     private static final Logger logger = LoggerFactory.getLogger(StockUtility.class);
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
+    private SearchingRepository searchingRepository;
 
     Results results = new Results();
 
@@ -182,6 +184,13 @@ public class StockUtility {
     }
 
     public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
+
+         List<SearchedStockDto> searchedStockDtos = searchingRepository.searchStockUsingEndpoint(searchId);
+        if (searchedStockDtos.isEmpty()) {
+            logger.error("No stock found with searchId: {}", searchId);
+            return null;
+        }
+
         JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
         JsonNode quarterlyProfit = financialData.get(1).get("quarterly");
         JsonNode yearlyRevenue = financialData.get(0).get("yearly");
@@ -195,32 +204,17 @@ public class StockUtility {
         double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
         String latestQuarter = getLatestQuarter(quarterlyRevenue);
 
-        String sql = """
-                    SELECT security_code, symbol
-                    FROM all_stocks
-                    WHERE endpoint = ?
-                """;
-
-        // Query for a list (safe approach, even if multiple accidentally match)
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, searchId);
-
-        if (rows.isEmpty()) {
-            throw new IllegalStateException("No matching record found for endpoint: " + searchId);
-        }
-        if (rows.size() > 1) {
-            throw new IllegalStateException("Multiple matching records found for endpoint: " + searchId);
-        }
-
-        Map<String, Object> row = rows.get(0);
-        String securityCode = (String) row.get("security_code");
-        String symbol = (String) row.get("symbol");
+        SearchedStockDto searchedStockDto = searchedStockDtos.get(0);
+        String symbol = searchedStockDto.getSymbol();
+        String securityCode = searchedStockDto.getSecurityCode();
+        String name = searchedStockDto.getName();
 
         List<String> urls =  createUrls(symbol, securityCode, searchId);
         String growwUrl = urls.get(0);
         String screenerUrl = urls.get(1);
         String trendlyneUrl = urls.get(2);
 
-        results.setStockName(searchId);
+        results.setStockName(name);
         results.setQuarterlyRevenueCngPrcnt(quarterlyRevenueCngPrcnt);
         results.setQuarterlyProfitCngPrcnt(quarterlyProfitCngPrcnt);
         results.setYearlyRevenueCngPrcnt(yearlyRevenueCngPrcnt);

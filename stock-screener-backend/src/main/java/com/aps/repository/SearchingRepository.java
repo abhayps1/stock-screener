@@ -35,4 +35,25 @@ public class SearchingRepository {
             )
         );
     }
+
+    public List<SearchedStockDto> searchStockUsingEndpoint(String endpoint) {
+        String sql = """
+            SELECT security_code, symbol, name, endpoint 
+            FROM all_stocks
+            WHERE endpoint LIKE LOWER(CONCAT('%', ?, '%'))
+        """;
+
+        return jdbcTemplate.query(
+            sql,
+            new Object[]{endpoint},
+            (rs, rowNum) -> new SearchedStockDto(
+                rs.getString("security_code"),
+                rs.getString("symbol"),
+                rs.getString("name"),
+                rs.getString("endpoint")
+            )
+        );
+    }
+
+    
 }
