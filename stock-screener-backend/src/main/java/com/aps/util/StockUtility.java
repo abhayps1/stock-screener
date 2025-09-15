@@ -3,6 +3,7 @@ package com.aps.util;
 
 import java.io.IOException;
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +15,8 @@ import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.aps.entity.Results;
@@ -27,6 +30,9 @@ import okhttp3.Response;
 public class StockUtility {
 
     private static final Logger logger = LoggerFactory.getLogger(StockUtility.class);
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     Results results = new Results();
 
@@ -189,6 +195,31 @@ public class StockUtility {
         double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
         String latestQuarter = getLatestQuarter(quarterlyRevenue);
 
+        String sql = """
+                    SELECT security_code, symbol
+                    FROM all_stocks
+                    WHERE endpoint = ?
+                """;
+
+        // Query for a list (safe approach, even if multiple accidentally match)
+        List<Map<String, Object>> rows = jdbcTemplate.queryForList(sql, searchId);
+
+        if (rows.isEmpty()) {
+            throw new IllegalStateException("No matching record found for endpoint: " + searchId);
+        }
+        if (rows.size() > 1) {
+            throw new IllegalStateException("Multiple matching records found for endpoint: " + searchId);
+        }
+
+        Map<String, Object> row = rows.get(0);
+        String securityCode = (String) row.get("security_code");
+        String symbol = (String) row.get("symbol");
+
+        List<String> urls =  createUrls(symbol, securityCode, searchId);
+        String growwUrl = urls.get(0);
+        String screenerUrl = urls.get(1);
+        String trendlyneUrl = urls.get(2);
+
         results.setStockName(searchId);
         results.setQuarterlyRevenueCngPrcnt(quarterlyRevenueCngPrcnt);
         results.setQuarterlyProfitCngPrcnt(quarterlyProfitCngPrcnt);
@@ -197,6 +228,9 @@ public class StockUtility {
         results.setYearlyNetworthCngPrcnt(yearlyNetworthCngPrcnt);
         results.setResultDate(Date.valueOf(resultDate));
         results.setLatestQuarter(latestQuarter);
+        results.setGrowwUrl(growwUrl);
+        results.setScreenerUrl(screenerUrl);
+        results.setTrendlyneUrl(trendlyneUrl);
         return results;
     }
 
@@ -233,6 +267,18 @@ public class StockUtility {
             latestQuarter = entry.getKey(); // Keep updating to get the last key
         }
         return latestQuarter;
+    }
+
+    public List<String> createUrls(String symbol, String securityCode, String endpoint) {
+        List<String> urls = new ArrayList<>();
+        urls.add("https://groww.in/stocks/" + endpoint);
+        if (null != securityCode)
+            urls.add("https://www.screener.in/company/" + securityCode + "/consolidated");
+        else
+            urls.add("https://www.screener.in/company/" + symbol + "/consolidated");
+        urls.add("https://trendlyne.com/equity/" + symbol + '/' + endpoint);
+
+        return urls;
     }
 
 }

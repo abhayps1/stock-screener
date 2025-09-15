@@ -5,6 +5,7 @@
                 <th>Stock Name</th>
                 <th>Result Date</th>
                 <th>Latest Quarter</th>
+                <th>Analytics</th>
                 <th>QRC</th>
                 <th>QPC</th>
                 <th>YRC</th>
@@ -17,6 +18,17 @@
                 <td>{{ result.stockName || 'N/A' }}</td>
                 <td>{{ result.resultDate | date:'dd-MM-yyyy' }}</td>
                 <td>{{ result.latestQuarter || 'N/A' }}</td>
+                <td>
+                  <a *ngIf="result.growwUrl" [href]="result.growwUrl" rel="noopener noreferrer" title="Groww">
+                    <img src="assets/images/icons/groww.svg" alt="Groww" width="24" height="24" />
+                  </a>
+                  <a *ngIf="result.screenerUrl" [href]="result.screenerUrl" rel="noopener noreferrer" title="Screener">
+                    <img src="assets/images/icons/screener.svg" alt="Screener" width="24" height="24" />
+                  </a>
+                  <a *ngIf="result.trendlyneUrl" [href]="result.trendlyneUrl" rel="noopener noreferrer" title="Trendlyne">
+                    <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="24" height="24" />
+                  </a>
+                </td>
                 <td [style.color]="result.quarterlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyRevenueCngPrcnt | number:'1.2-2' }}</td>
                 <td [style.color]="result.quarterlyProfitCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyProfitCngPrcnt | number:'1.2-2' }}</td>
                 <td [style.color]="result.yearlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyRevenueCngPrcnt | number:'1.2-2' }}</td>

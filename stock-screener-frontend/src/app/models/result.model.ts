@@ -7,4 +7,7 @@ export interface Result {
   yearlyRevenueCngPrcnt: number;
   yearlyProfitCngPrcnt: number;
   yearlyNetworthCngPrcnt: number;
+  growwUrl: string;
+  screenerUrl: string;
+  trendlyneUrl: string; 
 }

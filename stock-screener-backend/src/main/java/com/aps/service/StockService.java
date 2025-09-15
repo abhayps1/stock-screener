@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -63,15 +64,12 @@ public class StockService {
         String symbol = searchedStockDto.getSymbol();
         String name = searchedStockDto.getName();
         String endpoint = searchedStockDto.getEndpoint();
-        String screenerUrl = null;
 
-        if (null != securityCode)
-            screenerUrl = "https://www.screener.in/company/" + securityCode + "/consolidated";
-        else
-            screenerUrl = "https://www.screener.in/company/" + symbol.toLowerCase() + "/consolidated";
-        String trendlyneUrl = "https://trendlyne.com/equity/" + symbol.toLowerCase() + '/' + endpoint;
+        List<String> urls = stockUtility.createUrls(symbol.toLowerCase(), securityCode, endpoint);
+        String growwUrl = urls.get(0);
+        String screenerUrl = urls.get(1);
+        String trendlyneUrl = urls.get(2);
 
-        String growwUrl = "https://groww.in/stocks/" + endpoint;
         String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
         HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
         String indicatorString = stockUtility.mapToString(indicatorMap);

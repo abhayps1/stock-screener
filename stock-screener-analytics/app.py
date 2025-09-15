@@ -3,6 +3,7 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from add_all_stocks import update_all_stocks_data
+import requests
 
 # Load environment variables from .env file
 load_dotenv()
@@ -22,36 +23,49 @@ client = OpenAI(
     api_key=api_key,
 )
 
+@app.route('/get-models', methods=['GET'])
+def get_models():
+    url = "https://openrouter.ai/api/v1/models"
+    headers = {
+        "Authorization": f"Bearer {api_key}"
+    }
+
+    try:
+        resp = requests.get(url, headers=headers)
+        resp.raise_for_status()  # raise error if request failed
+        data = resp.json()
+
+        # ✅ Return a proper JSON response
+        return jsonify(data), 200
+
+    except requests.exceptions.RequestException as e:
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/screener-summary", methods=["GET"])
 def generate_summary():
     try:
+        company = request.args.get("symbol", "RELIANCE")
         
-        prompt = '''You are a data extraction assistant.  
-            Your task is to fetch the EXACT text from the "About" section of a company's page on Screener.in.  
-
-            Steps:  
-            1. Go to https://www.screener.in/ and search for the company using its name or stock symbol.  
-            2. Find the "About" section.  
-            3. Return the text EXACTLY as it appears on the page — no rephrasing, no summarizing, no interpretation.  
-            4. Do not include any extra commentary or formatting.  
-            5. Only output the raw text. '''
-
-        # Call OpenRouter AI
         response = client.chat.completions.create(
-            model="openai/gpt-4o-mini",  # You can change the model if needed
+            model="perplexity/llama-3.1-sonar-large-128k-online",  # 🔑 Web-enabled model
             messages=[
-                {"role": "system", "content": "You are a data extractor with access to the web. Fetch exact data from websites."},
-                {"role": "user", "content": "Search Screener.in for company RELIANCE and extract the exact 'About' section text."},
+                {
+                    "role": "system",
+                    "content": "You are a precise data extractor. You can search the web when needed and must return exact text."
+                },
+                {
+                    "role": "user",
+                    "content": f"Go to https://www.screener.in/company/{company}/ and extract the exact text from the About section. Return only the raw text, no summaries."
+                }
             ],
         )
 
-        print(response)
-        # print(f"Response code: {response.status_code}")
         summary = response.choices[0].message["content"]
         return jsonify({"summary": summary})
 
     except Exception as e:
-        return jsonify({"error is here": str(e)}), 500
+        return jsonify({"error": str(e)}), 500
 
 # @app.route('/health', methods=['GET'])
 # def health_check():

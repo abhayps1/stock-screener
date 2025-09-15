@@ -28,5 +28,11 @@ public class Results {
     private double yearlyRevenueCngPrcnt;
     private double yearlyProfitCngPrcnt;
     private double yearlyNetworthCngPrcnt;
+
+    private String growwUrl;
+
+	private String screenerUrl;
+
+	private String trendlyneUrl;
     
 }
