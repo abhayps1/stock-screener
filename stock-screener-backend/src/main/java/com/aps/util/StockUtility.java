@@ -16,7 +16,6 @@ import org.jsoup.nodes.Element;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 
 import com.aps.dto.SearchedStockDto;
@@ -81,9 +80,7 @@ public class StockUtility {
         return trendlyneUniqueId;
     }
 
-    public HashMap<String, String> fetchIndicatorsMap(String getTrendlyneUniqueId) {
-
-        HashMap<String, String> indicatorsMap = new HashMap<>();
+    public Document lazyLoadData(String getTrendlyneUniqueId) {
         OkHttpClient client = new OkHttpClient();
         String lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/" + getTrendlyneUniqueId + "/";
 
@@ -95,33 +92,37 @@ public class StockUtility {
             if (response.isSuccessful() && response.body() != null) {
                 String html = response.body().string();
                 Document document = org.jsoup.Jsoup.parse(html);
-
-                List<String> indicators = Arrays.asList(
-                        "Day RSI",
-                        "Day MACD",
-                        "Day MFI",
-                        "Day MACD Signal Line",
-                        "Day ADX",
-                        "Day ATR",
-                        "Day Commodity Channel Index",
-                        "Day ROC125",
-                        "Day ROC21",
-                        "William");
-                for (String indicator : indicators) {
-                    indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(document, indicator));
-                }
-
-                return indicatorsMap;
+                return document;
 
             } else {
-                indicatorsMap.put("error", "Failed to fetch data: " + response.code());
-                return indicatorsMap;
+                logger.error("Request failed: {}", response.code());
+                return null;
             }
         }
 
         catch (IOException e) {
             e.printStackTrace();
-            indicatorsMap.put("error", "Exception occurred: " + e.getMessage());
+            logger.error("Exception occurred: {}", e.getMessage());
+        }
+        return null;
+
+    }
+
+    public HashMap<String, String> getIndicatorData(Document lazyLoadData) {
+        HashMap<String, String> indicatorsMap = new HashMap<>();
+        List<String> indicators = Arrays.asList(
+                "Day RSI",
+                "Day MACD",
+                "Day MFI",
+                "Day MACD Signal Line",
+                "Day ADX",
+                "Day ATR",
+                "Day Commodity Channel Index",
+                "Day ROC125",
+                "Day ROC21",
+                "William");
+        for (String indicator : indicators) {
+            indicatorsMap.put(indicator, extractIndicatorUsingIndicatorName(lazyLoadData, indicator));
         }
         return indicatorsMap;
 
@@ -185,7 +186,7 @@ public class StockUtility {
 
     public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
 
-         List<SearchedStockDto> searchedStockDtos = searchingRepository.searchStockUsingEndpoint(searchId);
+        List<SearchedStockDto> searchedStockDtos = searchingRepository.searchStockUsingEndpoint(searchId);
         if (searchedStockDtos.isEmpty()) {
             logger.error("No stock found with searchId: {}", searchId);
             return null;
@@ -209,7 +210,7 @@ public class StockUtility {
         String securityCode = searchedStockDto.getSecurityCode();
         String name = searchedStockDto.getName();
 
-        List<String> urls =  createUrls(symbol, securityCode, searchId);
+        List<String> urls = createUrls(symbol, securityCode, searchId);
         String growwUrl = urls.get(0);
         String screenerUrl = urls.get(1);
         String trendlyneUrl = urls.get(2);

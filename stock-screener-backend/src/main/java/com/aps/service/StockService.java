@@ -4,10 +4,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.jsoup.nodes.Document;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -71,7 +71,8 @@ public class StockService {
         String trendlyneUrl = urls.get(2);
 
         String trendlyneUniqueId = stockUtility.getTrendlyneUniqueId(trendlyneUrl);
-        HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+        Document lazyLoadData = stockUtility.lazyLoadData(trendlyneUniqueId);
+        HashMap<String, String> indicatorMap = stockUtility.getIndicatorData(lazyLoadData);
         String indicatorString = stockUtility.mapToString(indicatorMap);
 
         Stock stock = new Stock();
@@ -94,7 +95,8 @@ public class StockService {
         logger.info("Updating indicator data for {} stocks", trendlyneUniqueIds.size());
 
         for (String trendlyneUniqueId : trendlyneUniqueIds) {
-            HashMap<String, String> indicatorMap = stockUtility.fetchIndicatorsMap(trendlyneUniqueId);
+            Document lazyLoadData = stockUtility.lazyLoadData(trendlyneUniqueId);
+            HashMap<String, String> indicatorMap = stockUtility.getIndicatorData(lazyLoadData);
             String indicatorString = stockUtility.mapToString(indicatorMap);
             stockRepository.updateIndicatorData(trendlyneUniqueId, indicatorString);
             logger.info("Updated indicator data for trendlyneUniqueId: {}", trendlyneUniqueId);
@@ -137,7 +139,7 @@ public class StockService {
                             continue;
                         }
                         Results result = stockUtility.formatAndSaveData(financialData, searchId, resultDate);
-                        if(result != null)
+                        if (result != null)
                             resultsRepository.save(result);
                     }
                 }
