@@ -155,4 +155,9 @@ public class StockService {
         return resultsRepository.findAll();
     }
 
+    public void getDeliveryVolume(String trendlyneUniqueId){
+        Document lazyLoadData = stockUtility.lazyLoadData(trendlyneUniqueId);
+    	stockUtility.getDeliveryVolume(lazyLoadData);
+    }
+
 }

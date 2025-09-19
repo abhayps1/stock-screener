@@ -4,11 +4,13 @@
 import pandas as pd
 import numpy as np
 import sqlalchemy
-
-
 import requests
 import pandas as pd
 import io
+import json
+import re
+import html
+from bs4 import BeautifulSoup
 
 def update_all_stocks_data():
 
@@ -88,3 +90,32 @@ def update_all_stocks_data():
     all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)
     print("All stocks data updated and saved to database successfully.")
 
+
+def clean_html_string(raw_html):
+    # Remove leading/trailing quotes if present
+    if raw_html.startswith('"') and raw_html.endswith('"'):
+        raw_html = raw_html[1:-1]
+    # Replace escaped quotes and newlines
+    raw_html = raw_html.replace('\\"', '"').replace('\\n', '\n')
+    return raw_html
+
+def extract_financial_data(html_content):
+    cleaned_html = clean_html_string(html_content)
+    soup = BeautifulSoup(cleaned_html, 'html.parser')
+    chart_div = soup.find('div', class_='technicals-chart-container')
+    if not chart_div:
+        print("No technicals-chart-container found.")
+        return None
+    data_chart_options = chart_div.get('data-chart-options')
+    if not data_chart_options:
+        print("No data-chart-options attribute found.")
+        return None
+    decoded_options = html.unescape(data_chart_options)
+    # Remove newlines and excessive spaces
+    decoded_options = re.sub(r'\s+', ' ', decoded_options).replace('\n', '').replace('\r', '')
+    try:
+        chart_data = json.loads(decoded_options)
+    except Exception as e:
+        print("Error parsing JSON:", e)
+        return None
+    return chart_data

@@ -2,7 +2,11 @@ from flask import Flask, request, jsonify
 from openai import OpenAI
 import os
 from dotenv import load_dotenv
-from add_all_stocks import update_all_stocks_data
+from app_utility import update_all_stocks_data
+from app_utility import extract_financial_data
+from bokeh.plotting import figure
+from bokeh.embed import components
+from flask_cors import CORS
 import requests
 
 # Load environment variables from .env file
@@ -10,6 +14,7 @@ load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
+CORS(app)
 
 # Get API key from environment variable
 api_key = os.getenv('OPENROUTER_API_KEY')
@@ -18,54 +23,54 @@ if not api_key:
     raise ValueError("OPENROUTER_API_KEY environment variable is not set")
 
 # Initialize OpenAI client
-client = OpenAI(
-    base_url="https://openrouter.ai/api/v1",
-    api_key=api_key,
-)
+# client = OpenAI(
+#     base_url="https://openrouter.ai/api/v1",
+#     api_key=api_key,
+# )
 
-@app.route('/get-models', methods=['GET'])
-def get_models():
-    url = "https://openrouter.ai/api/v1/models"
-    headers = {
-        "Authorization": f"Bearer {api_key}"
-    }
+# @app.route('/get-models', methods=['GET'])
+# def get_models():
+#     url = "https://openrouter.ai/api/v1/models"
+#     headers = {
+#         "Authorization": f"Bearer {api_key}"
+#     }
 
-    try:
-        resp = requests.get(url, headers=headers)
-        resp.raise_for_status()  # raise error if request failed
-        data = resp.json()
+#     try:
+#         resp = requests.get(url, headers=headers)
+#         resp.raise_for_status()  # raise error if request failed
+#         data = resp.json()
 
-        # ✅ Return a proper JSON response
-        return jsonify(data), 200
+#         # ✅ Return a proper JSON response
+#         return jsonify(data), 200
 
-    except requests.exceptions.RequestException as e:
-        return jsonify({"error": str(e)}), 500
+#     except requests.exceptions.RequestException as e:
+#         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/screener-summary", methods=["GET"])
-def generate_summary():
-    try:
-        company = request.args.get("symbol", "RELIANCE")
+# @app.route("/screener-summary", methods=["GET"])
+# def generate_summary():
+#     try:
+#         company = request.args.get("symbol", "RELIANCE")
         
-        response = client.chat.completions.create(
-            model="perplexity/llama-3.1-sonar-large-128k-online",  # 🔑 Web-enabled model
-            messages=[
-                {
-                    "role": "system",
-                    "content": "You are a precise data extractor. You can search the web when needed and must return exact text."
-                },
-                {
-                    "role": "user",
-                    "content": f"Go to https://www.screener.in/company/{company}/ and extract the exact text from the About section. Return only the raw text, no summaries."
-                }
-            ],
-        )
+#         response = client.chat.completions.create(
+#             model="perplexity/llama-3.1-sonar-large-128k-online",  # 🔑 Web-enabled model
+#             messages=[
+#                 {
+#                     "role": "system",
+#                     "content": "You are a precise data extractor. You can search the web when needed and must return exact text."
+#                 },
+#                 {
+#                     "role": "user",
+#                     "content": f"Go to https://www.screener.in/company/{company}/ and extract the exact text from the About section. Return only the raw text, no summaries."
+#                 }
+#             ],
+#         )
 
-        summary = response.choices[0].message["content"]
-        return jsonify({"summary": summary})
+#         summary = response.choices[0].message["content"]
+#         return jsonify({"summary": summary})
 
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
+#     except Exception as e:
+#         return jsonify({"error": str(e)}), 500
 
 # @app.route('/health', methods=['GET'])
 # def health_check():
@@ -170,6 +175,36 @@ def update_all_stocks():
         return jsonify({"success": True, "message": "All stocks data updated successfully."})
     except Exception as e:
         return jsonify({"success": False, "error": str(e)}), 500
+    
+@app.route('/delivery-volume', methods=['GET'])
+def get_delivery_volume():
+    # For demonstration, read from test.html instead of making a request
+    lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/3495/"
+    headers = {
+        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+    }
+   
+    response = requests.get(lazyLoadUrl, headers=headers)
+    print(response.status_code)
+    if response.status_code == 200:
+        financial_data = extract_financial_data(response.text)
+        return financial_data
+    else:
+        return jsonify({'error': f'Failed to fetch data. Status code: {response.status_code}'}), response.status_code
+
+    # if financial_data:
+    #     return jsonify(financial_data)
+    # else:
+    #     return jsonify({'error': 'Could not extract financial data'}), 500
+
+@app.route("/bokeh")
+def bokeh_plot():
+    p = figure(title="Bokeh Plot Example", width=400, height=400)
+    p.line([1, 2, 3, 4], [1, 4, 9, 16], line_width=2)
+    script, div = components(p)
+    # Return the script and div as a single HTML string
+    return f"{script}\n{div}"
+
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=5000)

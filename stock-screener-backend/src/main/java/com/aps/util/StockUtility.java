@@ -1,4 +1,3 @@
-
 package com.aps.util;
 
 import java.io.IOException;
@@ -274,6 +273,22 @@ public class StockUtility {
         urls.add("https://trendlyne.com/equity/" + symbol + '/' + endpoint);
 
         return urls;
+    }
+
+    public String getDeliveryVolume(Document lazyLoadData) {
+        if (lazyLoadData == null) {
+            return null;
+        }
+        // Element container = lazyLoadData.selectFirst(".technicals-chart-container");
+        // if (container != null) {
+        //     String data = container.attr("data-chart-options");
+        //     if (data != null && !data.isEmpty()) {
+        //         // Unescape HTML entities
+        //         data = data.replace(""", "\"");
+        //         return data;
+        //     }
+        // }
+        return null;
     }
 
 }

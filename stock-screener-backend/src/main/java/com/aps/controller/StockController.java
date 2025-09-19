@@ -92,4 +92,10 @@ public class StockController {
 		return stockService.searchStock(companyTerm);
 	}
 
+	@GetMapping("deliveryVolume")
+	public void getDeliveryVolume(@RequestParam String trendlyneUniqueId) {
+		stockService.getDeliveryVolume(trendlyneUniqueId);
+	}
+	
+
 }
