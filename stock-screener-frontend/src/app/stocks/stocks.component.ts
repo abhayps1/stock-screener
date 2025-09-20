@@ -1,6 +1,7 @@
 import { Component, OnInit, OnDestroy, ViewChild, AfterViewInit } from '@angular/core';
 import { StockService } from '../services/stock.service';
 import { Stock } from '../models/stock.model';
+import { Watchlist } from '../models/watchlist.model';
 import { Subject } from 'rxjs';
 import { SearchComponent } from '../search/search.component';
 
@@ -14,18 +15,22 @@ export class StocksComponent implements OnInit, OnDestroy, AfterViewInit {
   private searchComponentReady = false;
 
   stocks: Stock[] = [];
-  companyTerm: string = ''; // New search variable
+  watchlists: String[] = [];
+  companyTerm: string = '';
   searchResponseHTML: string = '';
   showForm = false;
   hoveredStock: Stock | null = null;
   private destroy$ = new Subject<void>();
   private inputSubject = new Subject<string>();
 
+  showCreateWatchlistModal: boolean = false;
+  newWatchlistName: string = '';
+
   constructor(private stockService: StockService) { }
 
   ngOnInit(): void {
+    this.loadWatchlist();
     this.loadStocks();
-    // this.setupDebouncedInput();
   }
 
   ngAfterViewInit(): void {
@@ -79,6 +84,41 @@ export class StocksComponent implements OnInit, OnDestroy, AfterViewInit {
       },
       error => {
         console.error('Error adding stock:', error);
+      }
+    );
+  }
+
+  openCreateWatchlistModal(): void {
+    this.showCreateWatchlistModal = true;
+  }
+
+  closeCreateWatchlistModal(): void {
+    this.showCreateWatchlistModal = false;
+    this.newWatchlistName = '';
+  }
+
+  createWatchlist(): void {
+    if (this.newWatchlistName.trim()) {
+
+      this.stockService.createWatchlist(this.newWatchlistName).subscribe(
+        (response: any) => {
+          this.watchlists.push(this.newWatchlistName);
+          this.closeCreateWatchlistModal();
+        },
+        (error: any) => {
+          console.error('Error adding to watchlist:', error);
+        }
+      );
+    }
+  }
+
+  loadWatchlist(): void {
+    this.stockService.getAllWatchlists().subscribe(
+      (watchlists: String[]) => {
+        this.watchlists = watchlists;
+      },
+      (error: any) => {
+        console.error('Error loading watchlist:', error);
       }
     );
   }

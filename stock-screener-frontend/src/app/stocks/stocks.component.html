@@ -1,3 +1,25 @@
+<!-- Watchlist Navbar above the search component -->
+<div class="watchlist-navbar">
+  <div class="watchlist-items">
+    <button class="add-watchlist-btn" (click)="openCreateWatchlistModal()">
+      <img src="assets/images/icons/sidebar/add.svg" alt="Add watchlist" width="24" height="20" />
+    </button>
+    <div class="watchlist-item" *ngFor="let watchlist of watchlists">
+      {{ watchlist }}
+    </div>
+  </div>
+</div>
+
+<!-- Create Watchlist Modal -->
+<div class="modal-overlay" *ngIf="showCreateWatchlistModal">
+  <div class="modal-content">
+    <h3>Create new watchlist</h3>
+    <input type="text" placeholder="Enter name" [(ngModel)]="newWatchlistName" />
+    <button class="create-btn" (click)="createWatchlist()">CREATE</button>
+    <button class="close-btn" (click)="closeCreateWatchlistModal()">CANCEL</button>
+  </div>
+</div>
+
 <app-search (stockSelected)="onStockSelected($event)"></app-search>
 
 <div class="mb-5">

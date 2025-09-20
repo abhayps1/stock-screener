@@ -11,3 +11,116 @@
 .position-relative {
     position: relative;
 }
+
+/* Watchlist navbar styles */
+.watchlist-navbar {
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #dee2e6;
+    padding: 8px 16px;
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.watchlist-items {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.watchlist-item {
+    background-color: #e9ecef;
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-weight: 600;
+    cursor: default;
+    user-select: none;
+}
+
+.add-watchlist-btn {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.add-watchlist-btn img {
+    width: 24px;
+    height: 20px;
+}
+
+/* Modal styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    width: 320px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    position: relative;
+}
+
+.modal-content h3 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.modal-content input[type="text"] {
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    outline: none;
+    transition: border-color 0.2s ease-in-out;
+}
+
+.modal-content input[type="text"]:focus {
+    border-color: #007bff;
+}
+
+.create-btn {
+    background-color: #198754; /* Bootstrap success color */
+    color: white;
+    border: none;
+    padding: 10px 0;
+    font-weight: 600;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+}
+
+.create-btn:hover {
+    background-color: #146c43;
+}
+
+.close-btn {
+    background-color: transparent;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    font-weight: 600;
+    text-align: center;
+    padding: 8px 0;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+}
