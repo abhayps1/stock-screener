@@ -3,11 +3,11 @@ from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from app_utility import update_all_stocks_data
-from app_utility import extract_financial_data
 from bokeh.plotting import figure
 from bokeh.embed import components
 from flask_cors import CORS
 import requests
+from app_utility import get_financial_data_for_stock
 
 # Load environment variables from .env file
 load_dotenv()
@@ -178,32 +178,19 @@ def update_all_stocks():
     
 @app.route('/delivery-volume', methods=['GET'])
 def get_delivery_volume():
-    # For demonstration, read from test.html instead of making a request
-    lazyLoadUrl = "https://trendlyne.com/equity/second-part-lazy-load-v2/3495/"
-    headers = {
-        "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
-    }
-   
-    response = requests.get(lazyLoadUrl, headers=headers)
-    print(response.status_code)
-    if response.status_code == 200:
-        financial_data = extract_financial_data(response.text)
-        return financial_data
+    trendlyne_id = "630"  # Example Trendlyne ID for a stock
+    if(get_financial_data_for_stock(trendlyne_id) != ""):
+        return jsonify({'message': 'Data fetched successfully.'})
     else:
-        return jsonify({'error': f'Failed to fetch data. Status code: {response.status_code}'}), response.status_code
+        return jsonify({'error': f'Failed to fetch data. Please try again later.'}), 500
 
-    # if financial_data:
-    #     return jsonify(financial_data)
-    # else:
-    #     return jsonify({'error': 'Could not extract financial data'}), 500
-
-@app.route("/bokeh")
-def bokeh_plot():
-    p = figure(title="Bokeh Plot Example", width=400, height=400)
-    p.line([1, 2, 3, 4], [1, 4, 9, 16], line_width=2)
-    script, div = components(p)
-    # Return the script and div as a single HTML string
-    return f"{script}\n{div}"
+# @app.route("/bokeh")
+# def bokeh_plot():
+#     p = figure(title="Bokeh Plot Example", width=400, height=400)
+#     p.line([1, 2, 3, 4], [1, 4, 9, 16], line_width=2)
+#     script, div = components(p)
+#     # Return the script and div as a single HTML string
+#     return f"{script}\n{div}"
 
 
 if __name__ == '__main__':

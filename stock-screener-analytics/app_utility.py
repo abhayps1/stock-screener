@@ -1,41 +1,173 @@
-# This code to is to merge the data of the stocks from BSE and NSE and filter out the active stocks only
-# The filtered data is then saved to a new CSV file for further analysis.
-
-import pandas as pd
-import numpy as np
-import sqlalchemy
+from datetime import date
 import requests
 import pandas as pd
-import io
-import json
-import re
-import html
+import numpy as np
+from io import StringIO
+import sqlalchemy
+from logger_util import get_console_logger
 from bs4 import BeautifulSoup
+import html
+import re
+import json
+import os
+
+logger = get_console_logger("app_util")
+
+# def clean_html_string(raw_html):
+#     # Remove leading/trailing quotes if present
+#     if raw_html.startswith('"') and raw_html.endswith('"'):
+#         raw_html = raw_html[1:-1]
+#     # Replace escaped quotes and newlines
+#     raw_html = raw_html.replace('\\"', '"').replace('\\n', '\n')
+#     return raw_html
+
+
+# def extract_financial_data(html_content):
+#     cleaned_html = clean_html_string(html_content)
+#     soup = BeautifulSoup(cleaned_html, 'html.parser')
+#     chart_div = soup.find('div', class_='technicals-chart-container')
+#     if not chart_div:
+#         print("No technicals-chart-container found.")
+#         return None
+#     data_chart_options = chart_div.get('data-chart-options')
+#     if not data_chart_options:
+#         print("No data-chart-options attribute found.")
+#         return None
+#     decoded_options = html.unescape(data_chart_options)
+#     # Remove newlines and excessive spaces
+#     decoded_options = re.sub(r'\s+', ' ', decoded_options).replace('\n', '').replace('\r', '')
+#     try:
+#         chart_data = json.loads(decoded_options)
+#     except Exception as e:
+#         print("Error parsing JSON:", e)
+#         return None
+#     return chart_data
+
+def getDeliveryVolume(response_text, stock_num):
+    json_data = json.loads(response_text)
+    volume_analysis = json_data["body"]['parameters']['volume_analysis']
+    day_volume = volume_analysis["tableData"][0]
+    current_date = date.today()
+    daily_total_volume = day_volume[1]
+    daily_delivery_percent = day_volume[2]
+    daily_delivery_volume = day_volume[3]
+    daily_delivery_data = {"dates" : current_date,
+        "daily_total_vol": [daily_total_volume],
+        "daily_delivery_prcnt": [daily_delivery_percent],
+        "daily_delivery_vol": [daily_delivery_volume]
+    }
+
+    daily_delivery_data_df = pd.DataFrame(daily_delivery_data)
+    if not os.path.exists(f"files/{stock_num}.csv"):
+        daily_delivery_data_df.to_csv(f"files/{stock_num}.csv", index=False)
+        logger.info("Stock Delivery Volume file created.")
+    else:
+        df = pd.read_csv(f"files/{stock_num}.csv")
+        if(str(current_date) not in df['dates'].values):
+            logger.info("Logic not working")
+            df = pd.concat([daily_delivery_data_df, df], ignore_index=True)
+            df.to_csv(f"files/{stock_num}.csv", index=False)
+            logger.info("Stock Delivery Volume file updated with new date entry.")
+        else:
+            logger.info("Date entry already exists. No update made.")
+
+def get_financial_data_for_stock(trendlyne_id):
+    url = f"https://trendlyne.com/equity/api/stock/adv-technical-analysis/{trendlyne_id}/24/"
+    payload = {}
+    headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+    }
+
+    response = requests.request("GET", url, headers=headers, data=payload)
+    
+    if(200 == response.status_code):
+        logger.info("Technical api response code : "+str(response.status_code))
+        response_body = response.text
+        content_type = response.headers['Content-Type']
+        logger.info("Technical api Response content type : "+content_type)
+        if(None != response_body and "" != response_body and "application/json" == content_type):
+            logger.info("Technical api response is ready for preprocessing")
+            getDeliveryVolume(response_body, trendlyne_id)
+            return "Hello"
+        logger.error("The response of Technical api is None/Empty or not in JSON format")
+        return ""
+    logger.error("Technical api Request failed with response code : "+str(response.status_code))
+    return ""
+
+def fetch_bse_data():
+    # This code can be hard-replaced as per change in BSE website.
+    url = "https://api.bseindia.com/BseIndiaAPI/api/ListofScripData/w?Group=&Scripcode=&industry=&segment=Equity&status=Active"
+    payload = {}
+    headers = {
+    'referer': 'https://www.bseindia.com/',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+    }
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    logger.info("BSE API Response Status Code : "+str(response.status_code))
+    if(200 == response.status_code):
+        response_body = response.text
+        content_type = response.headers['Content-Type']
+        logger.info("BSE API Response Content Type : "+content_type)
+        if(None != response_body and "" != response_body and "application/json; charset=utf-8" == content_type):
+            logger.info("The response of BSE API is parsable and is ready to be processed as csv")
+            return response_body
+       
+        logger.error("The response of BSE API is None/Empty or not in JSON format")
+        return ""
+    logger.error("BSE API Request failed with response code : "+str(response.status_code))
+    return ""
+
+def fetch_nse_data():
+
+    # This code can be hard-replaced as per change in NSE website.
+    url = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
+
+    payload = {}
+    headers = {
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/141.0.0.0 Safari/537.36'
+    }
+    response = requests.request("GET", url, headers=headers, data=payload)
+
+    # logger.info("response text : ", response.text)
+    logger.info("NSE API Response Status Code : "+str(response.status_code))
+    if(200 == response.status_code):
+        response_body = response.text
+        content_type = response.headers['Content-Type']
+        logger.info("NSE API Response Content Type : "+content_type)
+        if(None != response_body and "" != response_body and "text/csv" == content_type):
+            logger.info("The response of NSE API is parsable and is ready to be processed as csv")
+            return response_body
+       
+        logger.error("The response of NSE API is None/Empty or not in JSON format")
+        return ""
+    logger.error("NSE API Request failed with response code : "+str(response.status_code))
+    return ""
 
 def update_all_stocks_data():
 
-    bse_url = "https://api.bseindia.com/BseIndiaAPI/api/LitsOfScripCSVDownload/w?segment=Equity&status=&industry=&Group=&Scripcode="
-    bse_headers = {
-        "Referer": "https://www.bseindia.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
-    }
+    bse_response = fetch_bse_data()
+    nse_response = fetch_nse_data()
+    
+    if("" == bse_response or "" == nse_response):
+        logger.info("One of the API response is empty. Hence exiting without processing further.")
+        return None
 
-    bse_response = requests.get(bse_url, headers=bse_headers)
-    bse_response.raise_for_status()
-    print("BSE stocks data downloaded successfully.")
+    try:
+        bse_df = pd.read_json(StringIO(bse_response))
+        logger.info(f"BSE data parsed, \nTotal records fetched: {len(bse_df)}")
+    except Exception as e:
+        logger.error("Error parsing BSE CSV:", e)
+        # logger.error("Raw content of BSE API:", bse_response.content.decode('utf-8', errors='replace'))
 
-    nse_url = "https://nsearchives.nseindia.com/content/equities/EQUITY_L.csv"
-    nse_headers = {
-        "Referer": "https://www.nseindia.com/",
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
-    }
+    try:
+        nse_df = pd.read_csv(StringIO(nse_response))
+        logger.info(f"NSE data parsed, \nTotal records fetched: {len(nse_df)}")
+    except Exception as e:
+        logger.error(f"Error parsing NSE CSV: {e}")
+        # logger.error("Raw content of NSE API:\n" + str(nse_response))
+    
 
-    nse_response = requests.get(nse_url, headers=nse_headers)
-    nse_response.raise_for_status()
-    print("NSE stocks data downloaded successfully.")
-
-    bse_df = pd.read_csv(io.BytesIO(bse_response.content))
-    nse_df = pd.read_csv(io.BytesIO(nse_response.content))
 
     # Filter for only active stocks in BSE and for 'EQ' and 'BE' series in NSE
     bse_df = bse_df[bse_df['Status'] == 'Active']
@@ -47,6 +179,7 @@ def update_all_stocks_data():
     # Create a new dataframe called all_stocks_df with columns: Security Code, Symbol, Security Name, ISIN No, Industry Name, Listing Date
     selected_columns = ['Security Code', 'Security Id', 'Security Name', 'ISIN No', 'Industry New Name', 'Group']
     all_stocks_df = bse_df[selected_columns].rename(columns={'Security Code' : 'security_code', 'Security Id': 'symbol', 'Security Name' : 'name','ISIN No' : 'isin',  'Industry New Name': 'industry', 'Group': 'group'})
+
 
     # Add another column called Listing Date from nse_df to all_stocks_df based on matching ISIN numbers
     all_stocks_df = all_stocks_df.merge(nse_df[[' ISIN NUMBER', ' DATE OF LISTING']], left_on='isin', right_on=' ISIN NUMBER', how='left')
@@ -90,32 +223,3 @@ def update_all_stocks_data():
     all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)
     print("All stocks data updated and saved to database successfully.")
 
-
-def clean_html_string(raw_html):
-    # Remove leading/trailing quotes if present
-    if raw_html.startswith('"') and raw_html.endswith('"'):
-        raw_html = raw_html[1:-1]
-    # Replace escaped quotes and newlines
-    raw_html = raw_html.replace('\\"', '"').replace('\\n', '\n')
-    return raw_html
-
-def extract_financial_data(html_content):
-    cleaned_html = clean_html_string(html_content)
-    soup = BeautifulSoup(cleaned_html, 'html.parser')
-    chart_div = soup.find('div', class_='technicals-chart-container')
-    if not chart_div:
-        print("No technicals-chart-container found.")
-        return None
-    data_chart_options = chart_div.get('data-chart-options')
-    if not data_chart_options:
-        print("No data-chart-options attribute found.")
-        return None
-    decoded_options = html.unescape(data_chart_options)
-    # Remove newlines and excessive spaces
-    decoded_options = re.sub(r'\s+', ' ', decoded_options).replace('\n', '').replace('\r', '')
-    try:
-        chart_data = json.loads(decoded_options)
-    except Exception as e:
-        print("Error parsing JSON:", e)
-        return None
-    return chart_data
