@@ -152,7 +152,7 @@ public class StockService {
     }
 
     public List<Results> getResults() {
-        return resultsRepository.findAll();
+        return resultsRepository.findAllOrderByResultDateDesc();
     }
 
     public void getDeliveryVolume(String trendlyneUniqueId){

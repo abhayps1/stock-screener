@@ -10,20 +10,38 @@ import { Result } from '../models/result.model';
 export class ResultsComponent implements OnInit {
 
   results: Result[] = [];
+  isLoading: boolean = false;
+  isTriggered: boolean = false;
 
   constructor(private stockService: StockService) { }
 
   ngOnInit(): void {
-    this.loadResults();
+    this.getResults();
   }
 
-  loadResults(): void {
+  getResults(): void {
     this.stockService.getAllResults().subscribe(
       (data) => {
         this.results = data;
       },
       (error) => {
         console.error('Error fetching results:', error);
+      }
+    );
+  }
+
+  fetchResults(): void {
+    this.isTriggered = true;
+    this.isLoading = true;
+    this.stockService.fetchResults().subscribe(
+      (data) => {
+        console.log('Fetch results response:', data);
+        this.getResults(); // Refresh the results after fetching
+        this.isLoading = false;
+      },
+      (error) => {
+        console.error('Error fetching results:', error);
+        this.isLoading = false;
       }
     );
   }

@@ -13,36 +13,6 @@ import os
 
 logger = get_console_logger("app_util")
 
-# def clean_html_string(raw_html):
-#     # Remove leading/trailing quotes if present
-#     if raw_html.startswith('"') and raw_html.endswith('"'):
-#         raw_html = raw_html[1:-1]
-#     # Replace escaped quotes and newlines
-#     raw_html = raw_html.replace('\\"', '"').replace('\\n', '\n')
-#     return raw_html
-
-
-# def extract_financial_data(html_content):
-#     cleaned_html = clean_html_string(html_content)
-#     soup = BeautifulSoup(cleaned_html, 'html.parser')
-#     chart_div = soup.find('div', class_='technicals-chart-container')
-#     if not chart_div:
-#         print("No technicals-chart-container found.")
-#         return None
-#     data_chart_options = chart_div.get('data-chart-options')
-#     if not data_chart_options:
-#         print("No data-chart-options attribute found.")
-#         return None
-#     decoded_options = html.unescape(data_chart_options)
-#     # Remove newlines and excessive spaces
-#     decoded_options = re.sub(r'\s+', ' ', decoded_options).replace('\n', '').replace('\r', '')
-#     try:
-#         chart_data = json.loads(decoded_options)
-#     except Exception as e:
-#         print("Error parsing JSON:", e)
-#         return None
-#     return chart_data
-
 def getDeliveryVolume(response_text, stock_num):
     json_data = json.loads(response_text)
     volume_analysis = json_data["body"]['parameters']['volume_analysis']
@@ -144,6 +114,18 @@ def fetch_nse_data():
     logger.error("NSE API Request failed with response code : "+str(response.status_code))
     return ""
 
+def extract_company_slug(url):
+    """
+    Extracts the company slug from a BSE URL.
+    Example: 'https://www.bseindia.com/stock-share-price/abb-india-ltd/abb/500002/' -> 'abb-india-ltd'
+    """
+    # Split the URL by '/' and get the parts
+    parts = url.rstrip('/').split('/')
+    # The slug is typically the 5th part (index 4) in the URL structure
+    if len(parts) >= 5:
+        return parts[4]
+    return None
+
 def update_all_stocks_data():
 
     bse_response = fetch_bse_data()
@@ -166,20 +148,23 @@ def update_all_stocks_data():
     except Exception as e:
         logger.error(f"Error parsing NSE CSV: {e}")
         # logger.error("Raw content of NSE API:\n" + str(nse_response))
-    
 
+    # print(bse_df.columns)
+    # print(nse_df.columns)
 
     # Filter for only active stocks in BSE and for 'EQ' and 'BE' series in NSE
     bse_df = bse_df[bse_df['Status'] == 'Active']
     nse_df = nse_df[nse_df[' SERIES'].isin(['EQ', 'BE'])]
 
     # Identify common ISIN numbers in both DataFrames
-    common_isin = set(bse_df['ISIN No']) & set(nse_df[' ISIN NUMBER'])
+    common_isin = set(bse_df['ISIN_NUMBER']) & set(nse_df[' ISIN NUMBER'])
+
+    # Create the column endpoint in bse_df based on bse_url
+    bse_df['endpoint'] = bse_df['NSURL'].apply(extract_company_slug)
 
     # Create a new dataframe called all_stocks_df with columns: Security Code, Symbol, Security Name, ISIN No, Industry Name, Listing Date
-    selected_columns = ['Security Code', 'Security Id', 'Security Name', 'ISIN No', 'Industry New Name', 'Group']
-    all_stocks_df = bse_df[selected_columns].rename(columns={'Security Code' : 'security_code', 'Security Id': 'symbol', 'Security Name' : 'name','ISIN No' : 'isin',  'Industry New Name': 'industry', 'Group': 'group'})
-
+    selected_columns = ['SCRIP_CD', 'scrip_id', 'Scrip_Name', 'ISIN_NUMBER', 'INDUSTRY', 'GROUP', 'endpoint']
+    all_stocks_df = bse_df[selected_columns].rename(columns={'SCRIP_CD' : 'security_code', 'scrip_id': 'symbol', 'Scrip_Name' : 'name','ISIN_NUMBER' : 'isin',  'INDUSTRY': 'industry', 'GROUP': 'group'})
 
     # Add another column called Listing Date from nse_df to all_stocks_df based on matching ISIN numbers
     all_stocks_df = all_stocks_df.merge(nse_df[[' ISIN NUMBER', ' DATE OF LISTING']], left_on='isin', right_on=' ISIN NUMBER', how='left')
@@ -187,10 +172,11 @@ def update_all_stocks_data():
     all_stocks_df.rename(columns={' DATE OF LISTING': 'listing_date'}, inplace=True)
 
     # Identify ISIN numbers in NSE but not in BSE
-    unique_nse_isin = set(nse_df[' ISIN NUMBER']) - set(bse_df['ISIN No'])
-
+    unique_nse_isin = set(nse_df[' ISIN NUMBER']) - set(bse_df['ISIN_NUMBER'])
+    
     # Filter nse_df to only include rows with unique ISINs
-    filtered_nse_df = nse_df[nse_df[' ISIN NUMBER'].isin(unique_nse_isin)]
+    filtered_nse_df = nse_df[nse_df[' ISIN NUMBER'].isin(unique_nse_isin)].copy()
+    filtered_nse_df.loc[:, 'endpoint'] = filtered_nse_df['NAME OF COMPANY'].str.lower().str.replace(' ', '-').str.replace('(', '').str.replace(')', '').str.replace('limited', 'ltd').str.replace(',', '').str.replace('&', '').str.replace('__', '-').str.replace('---', '-').str.replace('--', '-').str.replace('-$', '')
 
     # Map columns for filtered_nse_df to match all_stocks_df
     mapped_nse_df = filtered_nse_df.rename(columns={
@@ -198,7 +184,7 @@ def update_all_stocks_data():
         'NAME OF COMPANY': 'name',
         ' DATE OF LISTING': 'listing_date',
         ' ISIN NUMBER': 'isin'
-    })[['symbol', 'name', 'listing_date', 'isin']]
+    })[['symbol', 'name', 'listing_date', 'isin', 'endpoint']]
 
     # Add missing columns with NaN or appropriate default values
     mapped_nse_df['security_code'] = np.nan
@@ -206,14 +192,11 @@ def update_all_stocks_data():
     mapped_nse_df['group'] = np.nan
 
     # Reorder columns to match all_stocks_df
-    mapped_nse_df = mapped_nse_df[['security_code', 'symbol', 'name', 'isin', 'industry', 'group',
+    mapped_nse_df = mapped_nse_df[['security_code', 'symbol', 'name', 'isin', 'industry', 'group', 'endpoint',
         'listing_date']]
 
     # Concatenate with all_stocks_df
     all_stocks_df = pd.concat([all_stocks_df, mapped_nse_df], ignore_index=True)
-
-    # Create Endpoint column
-    all_stocks_df['endpoint'] = all_stocks_df['name'].str.lower().str.replace(' ', '-').str.replace('(', '').str.replace(')', '').str.replace('limited', 'ltd').str.replace(',', '').str.replace('&', '').str.replace('__', '-').str.replace('---', '-').str.replace('--', '-').str.replace('-$', '')
 
     # Convert security_code to string without .0
     all_stocks_df['security_code'] = all_stocks_df['security_code'].astype(str).str.replace('.0', '', regex=False)
@@ -221,5 +204,5 @@ def update_all_stocks_data():
     # Save the updated all_stocks_df to database
     engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')
     all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)
-    print("All stocks data updated and saved to database successfully.")
+    logger.info("All stocks data updated and saved to database successfully.")
 

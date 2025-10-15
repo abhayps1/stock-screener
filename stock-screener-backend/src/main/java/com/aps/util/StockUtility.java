@@ -187,8 +187,7 @@ public class StockUtility {
 
         List<SearchedStockDto> searchedStockDtos = searchingRepository.searchStockUsingEndpoint(searchId);
         if (searchedStockDtos.isEmpty()) {
-            logger.error("No stock found with searchId: {}", searchId);
-            return null;
+            logger.error("{} Stock term is not found in all_stocks table", searchId);
         }
 
         JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
@@ -204,17 +203,27 @@ public class StockUtility {
         double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
         String latestQuarter = getLatestQuarter(quarterlyRevenue);
 
-        SearchedStockDto searchedStockDto = searchedStockDtos.get(0);
-        String symbol = searchedStockDto.getSymbol();
-        String securityCode = searchedStockDto.getSecurityCode();
-        String name = searchedStockDto.getName();
+        if(!searchedStockDtos.isEmpty()){
+            SearchedStockDto searchedStockDto = searchedStockDtos.get(0);
+            String symbol = searchedStockDto.getSymbol();
+            String securityCode = searchedStockDto.getSecurityCode();
+            String name = searchedStockDto.getName();
+            List<String> urls = createUrls(symbol, securityCode, searchId);
+            String growwUrl = urls.get(0);
+            String screenerUrl = urls.get(1);
+            String trendlyneUrl = urls.get(2);
+            results.setStockName(name);
+            results.setGrowwUrl(growwUrl);
+            results.setScreenerUrl(screenerUrl);
+            results.setTrendlyneUrl(trendlyneUrl);
+        }
+        else{
+            results.setStockName(searchId);
+            results.setGrowwUrl("https://groww.in/stocks/" + searchId);
+            results.setScreenerUrl(null);
+            results.setTrendlyneUrl(null);
+        }
 
-        List<String> urls = createUrls(symbol, securityCode, searchId);
-        String growwUrl = urls.get(0);
-        String screenerUrl = urls.get(1);
-        String trendlyneUrl = urls.get(2);
-
-        results.setStockName(name);
         results.setQuarterlyRevenueCngPrcnt(quarterlyRevenueCngPrcnt);
         results.setQuarterlyProfitCngPrcnt(quarterlyProfitCngPrcnt);
         results.setYearlyRevenueCngPrcnt(yearlyRevenueCngPrcnt);
@@ -222,9 +231,6 @@ public class StockUtility {
         results.setYearlyNetworthCngPrcnt(yearlyNetworthCngPrcnt);
         results.setResultDate(Date.valueOf(resultDate));
         results.setLatestQuarter(latestQuarter);
-        results.setGrowwUrl(growwUrl);
-        results.setScreenerUrl(screenerUrl);
-        results.setTrendlyneUrl(trendlyneUrl);
         return results;
     }
 

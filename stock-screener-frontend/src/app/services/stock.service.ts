@@ -39,6 +39,10 @@ export class StockService {
     return this.http.get<Result[]>(this.getResultsUrl);
   }
 
+  fetchResults(): Observable<string> {
+    return this.http.post(`${this.stockUrl}/fetchResults`, null, { responseType: 'text' });
+  }
+
   getAllWatchlistNames(): Observable<String[]> {
     return this.http.get<String[]>(`${this.watchlistUrl}/names`);
   }
