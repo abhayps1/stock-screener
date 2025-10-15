@@ -34,7 +34,7 @@ public class StockUtility {
     @Autowired
     private SearchingRepository searchingRepository;
 
-    Results results = new Results();
+    
 
     public String mapToString(HashMap<String, String> indicators) {
         String indicatorString = null;
@@ -185,6 +185,8 @@ public class StockUtility {
 
     public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
 
+        Results results = new Results();
+
         List<SearchedStockDto> searchedStockDtos = searchingRepository.searchStockUsingEndpoint(searchId);
         if (searchedStockDtos.isEmpty()) {
             logger.error("{} Stock term is not found in all_stocks table", searchId);
@@ -220,8 +222,6 @@ public class StockUtility {
         else{
             results.setStockName(searchId);
             results.setGrowwUrl("https://groww.in/stocks/" + searchId);
-            results.setScreenerUrl(null);
-            results.setTrendlyneUrl(null);
         }
 
         results.setQuarterlyRevenueCngPrcnt(quarterlyRevenueCngPrcnt);
