@@ -58,8 +58,12 @@ export class StockService {
     return this.http.get<String[]>(this.watchlistUrl);
   }
 
-  saveLink(link: Link): Observable<any> {
-    return this.http.post(this.saveLinkUrl, link, { responseType: 'text' });
+  saveLink(url: string): Observable<any> {
+    return this.http.post(this.saveLinkUrl, null, { params: { url }, responseType: 'text' });
+  }
+
+  deleteLink(id: number): Observable<any> {
+    return this.http.delete(`${this.getLinksUrl.replace('/getLinks', '')}/deleteLink/${id}`, { responseType: 'text' });
   }
 
   getAllLinks(): Observable<Link[]> {

@@ -9,27 +9,21 @@ import { Link } from '../models/link.model';
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  linkForm: FormGroup;
+  url: string = '';
   links: Link[] = [];
 
-  constructor(private fb: FormBuilder, private stockService: StockService) {
-    this.linkForm = this.fb.group({
-      description: ['', Validators.required],
-      url: ['', [Validators.required, Validators.pattern('https?://.+')]]
-    });
-  }
+  constructor(private stockService: StockService) {}
 
   ngOnInit(): void {
     this.loadLinks();
   }
 
   saveLink(): void {
-    if (this.linkForm.valid) {
-      const link: Link = this.linkForm.value;
-      this.stockService.saveLink(link).subscribe({
+    if (this.url.trim()) {
+      this.stockService.saveLink(this.url).subscribe({
         next: (response) => {
           console.log('Link saved:', response);
-          this.linkForm.reset();
+          this.url = '';
           this.loadLinks();
         },
         error: (error) => {
@@ -37,6 +31,24 @@ export class HomeComponent implements OnInit {
         }
       });
     }
+  }
+
+  onEnterKey(event: any): void {
+    if (event.key === 'Enter') {
+      this.saveLink();
+    }
+  }
+
+  deleteLink(id: number): void {
+    this.stockService.deleteLink(id).subscribe({
+      next: (response) => {
+        console.log('Link deleted:', response);
+        this.loadLinks();
+      },
+      error: (error) => {
+        console.error('Error deleting link:', error);
+      }
+    });
   }
 
   loadLinks(): void {
