@@ -6,15 +6,18 @@ import { environment } from '../../environments/environment';
 import { SearchedStock } from '../models/searched-stock.model';
 import { Result } from '../models/result.model';
 import { Watchlist } from '../models/watchlist.model';
+import { Link } from '../models/link.model';
 
 @Injectable({
   providedIn: 'root'
 })
 export class StockService {
-  
-  
+
+
   private stockUrl = environment.backendUrl+ '/api/stock';
   private watchlistUrl = environment.backendUrl + '/api/watchlist';
+  private saveLinkUrl = environment.backendUrl + '/api/link/saveLink';
+  private getLinksUrl = environment.backendUrl + '/api/link/getLinks';
   private getAllStocksUrl = this.stockUrl+'/allStocks';
   private addUrl = this.stockUrl+'/add';
   private searchUrl = this.stockUrl+'/search';
@@ -53,5 +56,13 @@ export class StockService {
 
   getAllWatchlists(): Observable<String[]> {
     return this.http.get<String[]>(this.watchlistUrl);
+  }
+
+  saveLink(link: Link): Observable<any> {
+    return this.http.post(this.saveLinkUrl, link, { responseType: 'text' });
+  }
+
+  getAllLinks(): Observable<Link[]> {
+    return this.http.get<Link[]>(this.getLinksUrl);
   }
 }

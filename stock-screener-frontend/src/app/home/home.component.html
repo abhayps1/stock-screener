@@ -1,0 +1,32 @@
+<div class="container">
+  <h2>Add Description Link</h2>
+<form [formGroup]="linkForm" (ngSubmit)="saveLink()">
+    <div class="form-group">
+      <label for="description">Description:</label>
+      <input type="text" id="description" formControlName="description" class="form-control" required>
+    </div>
+    <div class="form-group">
+      <label for="url">URL:</label>
+      <input type="url" id="url" formControlName="url" class="form-control" required>
+    </div>
+    <button type="submit" [disabled]="!linkForm.valid" class="btn btn-primary">Save</button>
+  </form>
+
+  <h2 class="mt-4">Description Links</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Description</th>
+        <th>Link</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let link of links">
+        <td>{{ link.id }}</td>
+        <td>{{ link.description }}</td>
+        <td><a [href]="link.url">Link</a></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
