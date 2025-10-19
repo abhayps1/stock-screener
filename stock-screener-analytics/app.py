@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify
-from openai import OpenAI
+#from openai import OpenAI
 import os
 from dotenv import load_dotenv
 from app_utility import update_all_stocks_data
