@@ -12,6 +12,7 @@ import { ResultsComponent } from './results/results.component';
 import { SearchComponent } from './search/search.component';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HomeComponent } from './home/home.component';
+import { AllstocksComponent } from './allstocks/allstocks.component';
 @NgModule({
   declarations: [
     AppComponent,
@@ -20,7 +21,8 @@ import { HomeComponent } from './home/home.component';
     StocksComponent,
     ResultsComponent,
     SearchComponent,
-    HomeComponent
+    HomeComponent,
+    AllstocksComponent
   ],
   imports: [
     BrowserModule,

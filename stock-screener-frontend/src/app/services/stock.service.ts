@@ -69,4 +69,8 @@ export class StockService {
   getAllLinks(): Observable<Link[]> {
     return this.http.get<Link[]>(this.getLinksUrl);
   }
+
+  getAllStocksList(): Observable<any[]> {
+    return this.http.get<any[]>(this.stockUrl + '/allStocksList');
+  }
 }

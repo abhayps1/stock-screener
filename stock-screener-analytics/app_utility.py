@@ -201,6 +201,9 @@ def update_all_stocks_data():
     # Convert security_code to string without .0
     all_stocks_df['security_code'] = all_stocks_df['security_code'].astype(str).str.replace('.0', '', regex=False)
 
+    # Convert listing_date to date format (DD-MMM-YYYY) without time
+    all_stocks_df['listing_date'] = pd.to_datetime(all_stocks_df['listing_date'], format='%d-%b-%Y', errors='coerce').dt.date
+
     # Save the updated all_stocks_df to database
     engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')
     all_stocks_df.to_sql('all_stocks', engine, if_exists='replace', index=False)

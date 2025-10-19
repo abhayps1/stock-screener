@@ -4,9 +4,11 @@ import { IpoListComponent } from './ipo-list/ipo-list.component';
 import { StocksComponent } from './stocks/stocks.component'; // Import your stocks component
 import { ResultsComponent } from './results/results.component';
 import { HomeComponent } from './home/home.component';
+import { AllstocksComponent } from './allstocks/allstocks.component';
 
 const routes: Routes = [
   { path: 'home', component: HomeComponent },
+  { path: 'allStocks', component: AllstocksComponent },
   { path: 'stocks', component: StocksComponent },
   { path: 'ipo', component: IpoListComponent },
   { path: '', redirectTo: '/home', pathMatch: 'full' }, // Optional: set Sector Analysis as default

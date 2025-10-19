@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.aps.dto.SearchedStockDto;
+import com.aps.dto.AllStocksDto;
 import com.aps.entity.Results;
 import com.aps.entity.Stock;
 import com.aps.service.StockService;
@@ -96,6 +97,11 @@ public class StockController {
 	public void getDeliveryVolume(@RequestParam String trendlyneUniqueId) {
 		stockService.getDeliveryVolume(trendlyneUniqueId);
 	}
-	
+
+	@GetMapping("/allStocksList")
+	public List<AllStocksDto> getAllStocksList() {
+		return stockService.getAllStocks();
+	}
+
 
 }

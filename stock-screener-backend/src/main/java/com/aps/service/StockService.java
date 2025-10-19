@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.aps.dto.SearchedStockDto;
+import com.aps.dto.AllStocksDto;
 import com.aps.entity.Results;
 import com.aps.entity.Stock;
 import com.aps.repository.ResultsRepository;
@@ -158,6 +159,10 @@ public class StockService {
     public void getDeliveryVolume(String trendlyneUniqueId){
         Document lazyLoadData = stockUtility.lazyLoadData(trendlyneUniqueId);
     	stockUtility.getDeliveryVolume(lazyLoadData);
+    }
+
+    public List<AllStocksDto> getAllStocks() {
+        return searchingRepository.getAllStocks();
     }
 
 }

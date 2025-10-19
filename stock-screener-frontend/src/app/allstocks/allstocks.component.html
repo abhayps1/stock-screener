@@ -1,0 +1,19 @@
+<div class="container">
+  <h2 class="mt-4">All Stocks</h2>
+  <table class="table table-striped " >
+    <thead class="table-dark">
+      <tr>
+        <th>Symbol</th>
+        <th>Name</th>
+        <th>Listing Date</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let stock of stocks">
+        <td>{{ stock.symbol }}</td>
+        <td>{{ stock.name }}</td>
+        <td>{{ stock.listingDate | date:'dd-MM-yyyy' }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
