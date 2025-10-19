@@ -10,17 +10,17 @@ import requests
 from app_utility import get_financial_data_for_stock
 
 # Load environment variables from .env file
-load_dotenv()
+# load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__)
 CORS(app)
 
 # Get API key from environment variable
-api_key = os.getenv('OPENROUTER_API_KEY')
+# api_key = os.getenv('OPENROUTER_API_KEY')
 
-if not api_key:
-    raise ValueError("OPENROUTER_API_KEY environment variable is not set")
+# if not api_key:
+#    raise ValueError("OPENROUTER_API_KEY environment variable is not set")
 
 # Initialize OpenAI client
 # client = OpenAI(
