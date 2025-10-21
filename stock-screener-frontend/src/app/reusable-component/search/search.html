@@ -1,0 +1,19 @@
+<div class="container mt-3">
+  <input type="text" placeholder="Search Groww..." [(ngModel)]="searchTerm" (input)="onSearch()" class="form-control mb-3" />
+
+  <ul class="list-group" *ngIf="showResults">
+    @for (stock of filteredStocks; track stock.symbol) {
+    <li class="list-group-item" (click)="stockSelected.emit(stock)">
+      <div>
+        <strong>{{ stock.name }}</strong><br>
+        <small>Symbol: {{ stock.symbol }} | Code: {{ stock.securityCode }}</small>
+      </div>
+    </li>
+    }
+  </ul>
+
+  <div *ngIf="filteredStocks.length === 0 && searchTerm.trim() && showResults" class="mt-3">
+    No stocks found using "{{ searchTerm }}" term
+  </div>
+
+</div>

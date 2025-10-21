@@ -1,4 +1,4 @@
-export interface Link {
+export interface LinkModel {
   id: number;
   description: string;
   url: string;

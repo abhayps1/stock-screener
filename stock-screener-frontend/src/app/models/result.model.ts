@@ -1,4 +1,4 @@
-export interface Result {
+export interface ResultModel {
   stockName: string;
   resultDate: string; // ISO date string
   latestQuarter: string;

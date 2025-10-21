@@ -1,0 +1,48 @@
+<div class="mb-5">
+    <button class="btn" [class.btn-primary]="!isTriggered" [class.btn-success]="isTriggered" type="button" (click)="fetchResults()" [disabled]="isLoading">
+        <span *ngIf="isLoading" class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        <span role="status">{{ isLoading ? ' Loading...' : 'Fetch Latest Results' }}</span>
+    </button>
+    <div class="table-responsive mt-2">
+        <table class="table table-striped table-hover w-100">
+        <thead class="table-dark">
+            <tr>
+                <th>Stock Name</th>
+                <th>Result Date</th>
+                <th>Latest Quarter</th>
+                <th>Analytics Links</th>
+                <th>QRC</th>
+                <th>QPC</th>
+                <th>YRC</th>
+                <th>YPC</th>
+                <th>YNC</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (result of results(); track result.stockName) {
+            <tr>
+                <td>{{ result.stockName || 'N/A' }}</td>
+                <td>{{ result.resultDate | date:'dd-MM-yy' }}</td>
+                <td [style.color]="(result.latestQuarter !== resultQuarter || !result.latestQuarter) ? 'red' : 'black'">{{ result.latestQuarter || 'N/A' }}</td>
+                <td>
+                  <a *ngIf="result.growwUrl" [href]="result.growwUrl" rel="noopener noreferrer" title="Groww">
+                    <img src="groww.svg" alt="Groww" width="24" height="24" />
+                  </a>
+                  <a *ngIf="result.screenerUrl" [href]="result.screenerUrl" rel="noopener noreferrer" title="Screener">
+                    <img src="screener.svg" alt="Screener" width="24" height="24" />
+                  </a>
+                  <a *ngIf="result.trendlyneUrl" [href]="result.trendlyneUrl" rel="noopener noreferrer" title="Trendlyne">
+                    <img src="trndlyne.svg" alt="Trendlyne" width="24" height="24" />
+                  </a>
+                </td>
+                <td [style.color]="result.quarterlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.quarterlyProfitCngPrcnt <= 0 ? 'red' : 'green'">{{ result.quarterlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyRevenueCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyRevenueCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyProfitCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyProfitCngPrcnt | number:'1.2-2' }}</td>
+                <td [style.color]="result.yearlyNetworthCngPrcnt <= 0 ? 'red' : 'green'">{{ result.yearlyNetworthCngPrcnt | number:'1.2-2' }}</td>
+            </tr>
+            }
+        </tbody>
+        </table>
+    </div>
+</div>

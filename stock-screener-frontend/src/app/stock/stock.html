@@ -1,0 +1,70 @@
+<!-- Watchlist Navbar above the search component -->
+<div class="watchlist-navbar">
+  <div class="watchlist-items">
+    <button class="add-watchlist-btn" (click)="openCreateWatchlistModal()">
+      <img src="assets/images/icons/sidebar/add.svg" alt="Add watchlist" width="24" height="20" />
+    </button>
+    @for (watchlist of watchlists; track watchlist) {
+    <div class="watchlist-item">
+      {{ watchlist }}
+    </div>
+    }
+  </div>
+</div>
+
+<!-- Create Watchlist Modal -->
+<div class="modal-overlay" *ngIf="showCreateWatchlistModal">
+  <div class="modal-content">
+    <h3>Create new watchlist</h3>
+    <input type="text" placeholder="Enter name" [ngModel]="newWatchlistName" (ngModelChange)="newWatchlistName = $event" />
+    <button class="create-btn" (click)="createWatchlist()">CREATE</button>
+    <button class="close-btn" (click)="closeCreateWatchlistModal()">CANCEL</button>
+  </div>
+</div>
+
+<app-search (stockSelected)="onStockSelected($event)"></app-search>
+
+<div class="mb-5">
+    <table class="table table-striped table-hover">
+        <thead>
+            <tr>
+                <th><input type="checkbox" /></th>
+                <th>Symbol</th>
+                <th>Name</th>
+                <th>Analytics</th>
+                <th>RSI</th>
+                <th>MFI</th>
+                <!-- <th>ALERT</th>
+                <th>SIGNAL DT</th>
+                <th>STATUS</th>
+                <th>ENTRY</th> -->
+            </tr>
+        </thead>
+        <tbody>
+            @for (stock of stocks; track stock.symbol) {
+            <tr>
+                <td><input type="checkbox" /></td>
+                <td>{{ stock.symbol || 'N/A' }}</td>
+                <td>{{ stock.name || 'N/A' }}</td>
+                <td>
+                  <a *ngIf="stock.growwUrl" [href]="stock.growwUrl" rel="noopener noreferrer" title="Groww">
+                    <img src="assets/images/icons/groww.svg" alt="Groww" width="24" height="24" />
+                  </a>
+                  <a *ngIf="stock.screenerUrl" [href]="stock.screenerUrl" rel="noopener noreferrer" title="Screener">
+                    <img src="assets/images/icons/screener.svg" alt="Screener" width="24" height="24" />
+                  </a>
+                  <a *ngIf="stock.trendlyneUrl" [href]="stock.trendlyneUrl" rel="noopener noreferrer" title="Trendlyne">
+                    <img src="assets/images/icons/trndlyne.svg" alt="Trendlyne" width="24" height="24" />
+                  </a>
+                </td>
+                <td>{{ stock.rsi || 'N/A' }}</td>
+                <td>{{ stock.mfi || 'N/A' }}</td>
+                <!-- <td>{{ stock.alert || 'N/A' }}</td>
+                <td>{{ stock.signalDt || 'N/A' }}</td>
+                <td>{{ stock.status || 'N/A' }}</td>
+                <td>{{ stock.entry || 'N/A' }}</td> -->
+            </tr>
+            }
+        </tbody>
+    </table>
+</div>

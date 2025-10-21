@@ -1,4 +1,4 @@
-export interface SearchedStock {
+export interface SearchedStockModel {
   securityCode: string;
   symbol: string;
   name: string;

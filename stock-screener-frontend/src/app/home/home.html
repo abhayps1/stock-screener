@@ -1,0 +1,27 @@
+<div class="container">
+  <div class="form-group">
+    <input type="url" id="url" [ngModel]="url()" (ngModelChange)="url.set($event)" class="form-control" placeholder="Enter URL to be added" (keydown.enter)="onEnterKey($event)" required>
+  </div>
+
+  <h2 class="mt-4">Description Links</h2>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <!-- <th>ID</th> -->
+        <th>Description</th>
+        <th>Link</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      @for (link of links(); track link.id) {
+      <tr>
+        <!-- <td>{{ link.id }}</td> -->
+        <td>{{ link.description }}</td>
+        <td><a [href]="link.url">{{ link.url }}</a></td>
+        <td><button class="btn btn-sm btn-outline-danger" style="font-size: 12px; padding: 2px 6px;" (click)="deleteLink(link.id)">DELETE</button></td>
+      </tr>
+      }
+    </tbody>
+  </table>
+</div>

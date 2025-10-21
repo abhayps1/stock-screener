@@ -1,4 +1,4 @@
-export interface Announcement {
+export interface AnnouncementModel {
     newsId: string;
     attachment: string;
     companyName: string;
