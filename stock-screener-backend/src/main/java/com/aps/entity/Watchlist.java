@@ -9,10 +9,8 @@ import java.util.List;
 @Data
 public class Watchlist {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
+    @Id
     @Column(nullable = false)
     private String name;
 

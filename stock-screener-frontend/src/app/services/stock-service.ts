@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { environment } from '../../environments/environment';
 import { HttpClient } from '@angular/common/http';
-import { Stock } from '../models/stock.model';
+import { StockModel } from '../models/stock.model';
 import { Observable } from 'rxjs';
 import { SearchedStockModel } from '../models/searched-stock.model';
 import { ResultModel } from '../models/result.model';
@@ -24,8 +24,8 @@ export class StockService {
 
   constructor(private http: HttpClient) { }
 
-  getStocks(): Observable<Stock[]> {
-    return this.http.get<Stock[]>(this.getAllStocksUrl);
+  getStocks(): Observable<StockModel[]> {
+    return this.http.get<StockModel[]>(this.getAllStocksUrl);
   }
 
   addStock(stock: SearchedStockModel): Observable<any> {
@@ -45,15 +45,15 @@ export class StockService {
   }
 
   getAllWatchlistNames(): Observable<String[]> {
-    return this.http.get<String[]>(`${this.watchlistUrl}/names`);
+    return this.http.get<String[]>(`${this.watchlistUrl}`);
   }
 
-  createWatchlist(newWatchlistName: String) {
-    return this.http.post(`${this.watchlistUrl}/create?newWatchlistName=${newWatchlistName}`, null, { responseType: 'text' });
+  createWatchlistByName(newWatchlistName: String) {
+    return this.http.post(`${this.watchlistUrl}?newWatchlistName=${newWatchlistName}`, null, { responseType: 'text' });
   }
 
-  getAllWatchlists(): Observable<String[]> {
-    return this.http.get<String[]>(this.watchlistUrl);
+  deleteWatchlistByName(watchlistName: String): Observable<any> {
+    return this.http.delete(`${this.watchlistUrl}/${watchlistName}`, { responseType: 'text' });
   }
 
   saveLink(url: string): Observable<any> {

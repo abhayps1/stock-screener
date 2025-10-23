@@ -28,43 +28,25 @@ public class WatchlistController {
     }
 
     @GetMapping
-    public List<String> getAllWatchlists() {
-        return watchlistService.getAllWatchlistNames();
-    }
-
-    @GetMapping("/names")
     public List<String> getAllWatchlistNames() {
         return watchlistService.getAllWatchlistNames();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Watchlist> getWatchlistById(@PathVariable Long id) {
-        return watchlistService.getWatchlistById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
-    }
-
     @PostMapping
-    public ResponseEntity<Watchlist> createWatchlist(@RequestBody Watchlist watchlist) {
-        Watchlist created = watchlistService.createWatchlist(watchlist);
-        return ResponseEntity.ok(created);
-    }
-
-    @PostMapping("/create")
     public ResponseEntity<Watchlist> createWatchlistByName(@RequestParam String newWatchlistName) {
         Watchlist created = watchlistService.createWatchlistByName(newWatchlistName);
         return ResponseEntity.ok(created);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Watchlist> updateWatchlist(@PathVariable Long id, @RequestBody Watchlist watchlist) {
-        Watchlist updated = watchlistService.updateWatchlist(id, watchlist);
-        return ResponseEntity.ok(updated);
-    }
+    // @PutMapping("/{id}")
+    // public ResponseEntity<Watchlist> updateWatchlist(@PathVariable Long id, @RequestBody Watchlist watchlist) {
+    //     Watchlist updated = watchlistService.updateWatchlist(id, watchlist);
+    //     return ResponseEntity.ok(updated);
+    // }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWatchlist(@PathVariable Long id) {
-        watchlistService.deleteWatchlist(id);
+    @DeleteMapping("/{watchlistName}")
+    public ResponseEntity<Void> deleteWatchlistByName(@PathVariable String watchlistName) {
+        watchlistService.deleteWatchlistByName(watchlistName);
         return ResponseEntity.noContent().build();
     }
 }

@@ -19,33 +19,29 @@ public class WatchlistService {
         return watchlistRepository.getAllWatchlistNames();
     }
 
-    public Optional<Watchlist> getWatchlistById(Long id) {
-        return watchlistRepository.findById(id);
-    }
-
-    public Watchlist createWatchlist(Watchlist watchlist) {
-        return watchlistRepository.save(watchlist);
-    }
 
     public Watchlist createWatchlistByName(String newWatchlistName) {
+        if(watchlistRepository.existsById(newWatchlistName)) {
+            throw new RuntimeException("Watchlist already exists with name: " + newWatchlistName);
+        }
         Watchlist watchlist = new Watchlist();
         watchlist.setName(newWatchlistName);
         return watchlistRepository.save(watchlist);
     }
 
-    public Watchlist updateWatchlist(Long id, Watchlist updatedWatchlist) {
-        return watchlistRepository.findById(id)
-                .map(existing -> {
-                    existing.setName(updatedWatchlist.getName());
-                    return watchlistRepository.save(existing);
-                })
-                .orElseThrow(() -> new RuntimeException("Watchlist not found with id: " + id));
-    }
+    // public Watchlist updateWatchlist(Long id, Watchlist updatedWatchlist) {
+    //     return watchlistRepository.findById(id)
+    //             .map(existing -> {
+    //                 existing.setName(updatedWatchlist.getName());
+    //                 return watchlistRepository.save(existing);
+    //             })
+    //             .orElseThrow(() -> new RuntimeException("Watchlist not found with id: " + id));
+    // }
 
-    public void deleteWatchlist(Long id) {
-        if (!watchlistRepository.existsById(id)) {
-            throw new RuntimeException("Watchlist not found with id: " + id);
+    public void deleteWatchlistByName(String watchlistName) {
+        if (!watchlistRepository.existsById(watchlistName)) {
+            throw new RuntimeException("Watchlist not found with name: " + watchlistName);
         }
-        watchlistRepository.deleteById(id);
+        watchlistRepository.deleteById(watchlistName);
     }
 }

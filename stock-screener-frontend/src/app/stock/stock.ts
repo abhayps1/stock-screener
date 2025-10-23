@@ -1,10 +1,10 @@
-import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, OnDestroy, OnInit, ViewChild, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Search } from '../reusable-component/search/search';
 import { Subject } from 'rxjs';
 import { StockService } from '../services/stock-service';
-import { Stock as StockModel } from '../models/stock.model';
+import { StockModel } from '../models/stock.model';
 
 @Component({
   selector: 'app-stock',
@@ -18,7 +18,8 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
   private searchComponentReady = false;
 
   stocks: StockModel[] = [];
-  watchlists: String[] = [];
+  watchlists = signal<String[]>([]);
+  selectedWatchlist = signal<string>('');
   companyTerm: string = '';
   searchResponseHTML: string = '';
   showForm = false;
@@ -103,9 +104,10 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
   createWatchlist(): void {
     if (this.newWatchlistName.trim()) {
 
-      this.stockService.createWatchlist(this.newWatchlistName).subscribe(
+      this.stockService.createWatchlistByName(this.newWatchlistName).subscribe(
         (response: any) => {
-          this.watchlists.push(this.newWatchlistName);
+          this.watchlists.update(list => [...list, this.newWatchlistName]);
+          this.selectedWatchlist.set(this.newWatchlistName);
           this.closeCreateWatchlistModal();
         },
         (error: any) => {
@@ -115,10 +117,29 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
     }
   }
 
+  selectWatchlist(watchlistName: String): void {
+    this.selectedWatchlist.set(watchlistName.toString());
+  }
+
+  deleteWatchlistByName(watchlistName: String): void {
+    this.stockService.deleteWatchlistByName(watchlistName).subscribe(
+      (response: any) => {
+        this.watchlists.update(list => list.filter(w => w !== watchlistName));
+        if (this.selectedWatchlist() === watchlistName.toString()) {
+          this.selectedWatchlist.set('');
+        }
+      },
+      (error: any) => {
+        console.error('Error deleting watchlist:', error);
+      }
+    );
+  }
+
   loadWatchlist(): void {
-    this.stockService.getAllWatchlists().subscribe(
+    this.stockService.getAllWatchlistNames().subscribe(
       (watchlists: String[]) => {
-        this.watchlists = watchlists;
+        console.log('Loaded watchlists:', watchlists);
+        this.watchlists.set(watchlists);
       },
       (error: any) => {
         console.error('Error loading watchlist:', error);
