@@ -115,10 +115,6 @@ def fetch_nse_data():
     return ""
 
 def extract_company_slug(url):
-    """
-    Extracts the company slug from a BSE URL.
-    Example: 'https://www.bseindia.com/stock-share-price/abb-india-ltd/abb/500002/' -> 'abb-india-ltd'
-    """
     # Split the URL by '/' and get the parts
     parts = url.rstrip('/').split('/')
     # The slug is typically the 5th part (index 4) in the URL structure

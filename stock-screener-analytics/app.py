@@ -165,7 +165,7 @@ CORS(app)
 #         }), 500
 
 
-@app.route('/update-all', methods=['POST'])
+@app.route('/update-all-stocks', methods=['POST'])
 def update_all_stocks():
     """
     Endpoint to trigger the update of all stocks data

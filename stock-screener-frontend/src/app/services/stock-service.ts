@@ -20,6 +20,7 @@ export class StockService {
   private searchUrl = this.stockUrl+'/search';
   private refreshIndicatorsUrl = this.stockUrl+'/updateIndicatorData';
   private getResultsUrl = this.stockUrl + '/getResults';
+  private updateAllStocksUrl = environment.analyticsUrl + '/update-all-stocks';
 
   constructor(private http: HttpClient) { }
 
@@ -85,6 +86,10 @@ export class StockService {
     else if (month >= 7 && month <= 9) return 'Jun  \''+year; // Current Q2 → previous ends in Jun
     else if (month >= 10 && month <= 12) return 'Sep \''+year; // Current Q3 → previous ends in Sep
     else return 'Dec \''+(year-1); // Current Q4 → previous ends in Dec
+  }
+
+  updateAllStocks(): Observable<any> {
+    return this.http.post(this.updateAllStocksUrl, null);
   }
   
 }
