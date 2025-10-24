@@ -8,7 +8,7 @@
           (click)="selectWatchlist(watchlist)"
           href="javascript:void(0)"
         >
-          {{ watchlist }}
+          {{ watchlist  }}
           @if (selectedWatchlist() === watchlist) {
             <button class="btn btn-sm btn-outline-danger ms-2" (click)="deleteWatchlistByName(watchlist); $event.stopPropagation()">❌</button>
           }
@@ -35,7 +35,7 @@
     <h3>Create new watchlist</h3>
     <input type="text" placeholder="Enter name" [ngModel]="newWatchlistName"
       (ngModelChange)="newWatchlistName = $event" />
-    <button class="create-btn" (click)="createWatchlist()">CREATE</button>
+    <button class="create-btn" (click)="createWatchlistByName()">CREATE</button>
     <button class="close-btn" (click)="closeCreateWatchlistModal()">CANCEL</button>
   </div>
 </div>

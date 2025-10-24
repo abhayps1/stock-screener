@@ -29,6 +29,7 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
 
   showCreateWatchlistModal: boolean = false;
   newWatchlistName: string = '';
+  watchlistErrorMessage: string = '';
 
   constructor(private stockService: StockService) { }
 
@@ -101,17 +102,18 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
     this.newWatchlistName = '';
   }
 
-  createWatchlist(): void {
+  createWatchlistByName(): void {
     if (this.newWatchlistName.trim()) {
-
-      this.stockService.createWatchlistByName(this.newWatchlistName).subscribe(
+      
+      this.stockService.createWatchlistByName(this.newWatchlistName.toUpperCase()).subscribe(
         (response: any) => {
           this.watchlists.update(list => [...list, this.newWatchlistName]);
           this.selectedWatchlist.set(this.newWatchlistName);
           this.closeCreateWatchlistModal();
         },
         (error: any) => {
-          console.error('Error adding to watchlist:', error);
+          console.error('Error creating watchlist:', error);
+          alert('Watchlist already exists');
         }
       );
     }
