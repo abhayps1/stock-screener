@@ -13,6 +13,9 @@ import { StockService } from '../services/stock-service';
 export class Home implements OnInit {
   url = signal('');
   links = signal<LinkModel[]>([]);
+  editingLinkId: number | null = null;
+  editingDescription = signal('');
+  errorMessage = signal('');
 
   constructor(private stockService: StockService) {}
 
@@ -23,14 +26,20 @@ export class Home implements OnInit {
 
   saveLink(): void {
     if (this.url().trim()) {
-      this.stockService.saveLink(this.url()).subscribe({
+      this.stockService.saveLink(this.url().trim()).subscribe({
         next: (response) => {
           console.log('Link saved:', response);
           this.url.set('');
+          this.errorMessage.set('');
           this.loadLinks();
         },
         error: (error) => {
           console.error('Error saving link:', error);
+          if (error.error && typeof error.error === 'string' && error.error.includes('Link already exists')) {
+            this.errorMessage.set('Link already exists');
+          } else {
+            this.errorMessage.set('Error saving link');
+          }
         }
       });
     }
@@ -52,6 +61,32 @@ export class Home implements OnInit {
         console.error('Error deleting link:', error);
       }
     });
+  }
+
+  onDoubleClick(link: LinkModel): void {
+    this.editingLinkId = link.id;
+    this.editingDescription.set(link.description);
+  }
+
+  saveDescription(): void {
+    if (this.editingLinkId !== null && this.editingDescription().trim()) {
+      this.stockService.updateLink(this.editingLinkId, this.editingDescription()).subscribe({
+        next: (response) => {
+          console.log('Link updated:', response);
+          this.editingLinkId = null;
+          this.editingDescription.set('');
+          this.loadLinks();
+        },
+        error: (error) => {
+          console.error('Error updating link:', error);
+        }
+      });
+    }
+  }
+
+  cancelEdit(): void {
+    this.editingLinkId = null;
+    this.editingDescription.set('');
   }
 
   loadLinks(): void {

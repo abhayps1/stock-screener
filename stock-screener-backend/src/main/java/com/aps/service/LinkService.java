@@ -22,6 +22,9 @@ public class LinkService {
 
     public Link saveLink(String url) throws IOException {
         try {
+            if (linkRepository.existsByUrl(url)) {
+                throw new RuntimeException("Link already exists");
+            }
             logger.info("Fetching document from URL: {}", url);
             Document doc = Jsoup.connect(url).get();
             String description = doc.title();
@@ -47,6 +50,19 @@ public class LinkService {
         } catch (Exception e) {
             logger.error("Error occurred while deleting link with ID: {}. Error: {}", id, e.getMessage(), e);
             throw new RuntimeException("Failed to delete link with ID: " + id, e);
+        }
+    }
+
+    public void updateLink(Long id, String description) {
+        try {
+            logger.info("Updating link with ID: {} to description: {}", id, description);
+            Link link = linkRepository.findById(id).orElseThrow(() -> new RuntimeException("Link not found"));
+            link.setDescription(description);
+            linkRepository.save(link);
+            logger.info("Successfully updated link with ID: {}", id);
+        } catch (Exception e) {
+            logger.error("Error occurred while updating link with ID: {}. Error: {}", id, e.getMessage(), e);
+            throw new RuntimeException("Failed to update link with ID: " + id, e);
         }
     }
 

@@ -64,6 +64,10 @@ export class StockService {
     return this.http.delete(`${this.getLinksUrl.replace('/getLinks', '')}/deleteLink/${id}`, { responseType: 'text' });
   }
 
+  updateLink(id: number, description: string): Observable<any> {
+    return this.http.put(`${this.getLinksUrl.replace('/getLinks', '')}/updateLink/${id}?description=${encodeURIComponent(description)}`, null, { responseType: 'text' });
+  }
+
   getAllLinks(): Observable<LinkModel[]> {
     console.log("Inside getAllLinks of StockService");
     return this.http.get<LinkModel[]>(this.getLinksUrl);

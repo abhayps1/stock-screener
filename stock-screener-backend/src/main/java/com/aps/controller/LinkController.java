@@ -31,6 +31,12 @@ public class LinkController {
         return "Link deleted successfully";
     }
 
+    @PutMapping("/updateLink/{id}")
+    public String updateLink(@PathVariable Long id, @RequestParam String description) {
+        linkService.updateLink(id, description);
+        return "Link updated successfully";
+    }
+
     @GetMapping("/getLinks")
     public List<Link> getAllLinks() {
         return linkService.getAllLinks();
