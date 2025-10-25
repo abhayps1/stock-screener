@@ -142,6 +142,9 @@ export class Stock implements OnInit, OnDestroy, AfterViewInit {
       (watchlists: String[]) => {
         console.log('Loaded watchlists:', watchlists);
         this.watchlists.set(watchlists);
+        if (watchlists.length > 0) {
+          this.selectedWatchlist.set(watchlists[0].toString());
+        }
       },
       (error: any) => {
         console.error('Error loading watchlist:', error);
