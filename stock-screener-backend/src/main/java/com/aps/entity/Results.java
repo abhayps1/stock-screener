@@ -34,5 +34,9 @@ public class Results {
 	private String screenerUrl;
 
 	private String trendlyneUrl;
+
+    private int marketCap;
+    private double peRatio;
+    private double industryPe;
     
 }

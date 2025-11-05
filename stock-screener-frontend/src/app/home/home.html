@@ -27,7 +27,7 @@
             {{ link.description }}
           }
         </td>
-        <td><a [href]="link.url">{{ link.url }}</a></td>
+        <td><a [href]="link.url" target="_blank">{{ link.url }}</a></td>
         <td><button class="btn btn-sm btn-outline-danger" style="font-size: 12px; padding: 2px 6px;" (click)="deleteLink(link.id)">DELETE</button></td>
       </tr>
       }

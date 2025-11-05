@@ -109,7 +109,7 @@ public class StockService {
         try {
             OkHttpClient client = new OkHttpClient();
 
-            String dateFrom = LocalDate.now().minusDays(4).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String dateFrom = LocalDate.now().minusDays(2).format(DateTimeFormatter.ISO_LOCAL_DATE);
             String dateTo = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             String url = "https://groww.in/v1/api/stocks_data/equity_feature/v2/corporate_action/event?from="
@@ -135,11 +135,15 @@ public class StockService {
                         String searchId = event.optString("searchId");
                         JSONObject pill = event.optJSONObject("corporateEventPillDto");
                         String resultDate = pill != null ? pill.optString("primaryDate") : "";
-                        JsonNode financialData = stockUtility.getStockFinancialStatement(searchId);
+                        JsonNode stockData = stockUtility.getStockData(searchId);
+                        if (stockData == null) {
+                            continue;
+                        }
+                        JsonNode financialData = stockUtility.getStockFinancialStatement(stockData);
                         if (financialData == null) {
                             continue;
                         }
-                        Results result = stockUtility.formatAndSaveData(financialData, searchId, resultDate);
+                        Results result = stockUtility.formatAndSaveData(stockData, searchId, resultDate);
                         if (result != null)
                             resultsRepository.save(result);
                     }

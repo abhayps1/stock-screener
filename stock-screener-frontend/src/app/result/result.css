@@ -1,0 +1,35 @@
+.table-responsive {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  table-layout: fixed;
+}
+
+.table th,
+.table td {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding: 8px;
+}
+
+.table th {
+  font-weight: bold;
+}
+
+.table td {
+  word-wrap: break-word;
+}
+
+.table th:nth-child(1),
+.table td:nth-child(1) {
+  width: 200px;
+}
+
+.table th:nth-child(7),
+.table td:nth-child(7) {
+  width: 120px;
+}

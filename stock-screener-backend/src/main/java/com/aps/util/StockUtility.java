@@ -139,7 +139,7 @@ public class StockUtility {
         return indicator + " data is not found";
     }
 
-    public JsonNode getStockFinancialStatement(String searchId) {
+    public JsonNode getStockData(String searchId) {
         String growwUrl = "https://groww.in/stocks/" + searchId;
         OkHttpClient client = new OkHttpClient();
 
@@ -156,19 +156,11 @@ public class StockUtility {
                     String jsonData = nextDataScript.html();
                     ObjectMapper mapper = new ObjectMapper();
                     JsonNode root = mapper.readTree(jsonData);
-                    JsonNode financialStatement = root
+                    JsonNode stockData = root
                             .path("props")
                             .path("pageProps")
-                            .path("stockData")
-                            .path("financialStatement");
-
-                    if (financialStatement.isMissingNode()) {
-                        logger.warn("financialStatement not found.");
-                        return null;
-                    } else {
-                        logger.info("financialStatement fetched successfully.");
-                        return financialStatement;
-                    }
+                            .path("stockData");
+                    return stockData;
                 } else {
                     logger.warn("__NEXT_DATA__ script tag not found.");
                     return null;
@@ -183,7 +175,23 @@ public class StockUtility {
         }
     }
 
-    public Results formatAndSaveData(JsonNode financialData, String searchId, String resultDate) {
+    public JsonNode getStockFinancialStatement(JsonNode stockData) {
+        if (stockData == null) {
+            logger.warn("stockData is null.");
+            return null;
+        }
+        JsonNode financialStatement = stockData.path("financialStatement");
+
+        if (financialStatement.isMissingNode()) {
+            logger.warn("financialStatement not found.");
+            return null;
+        } else {
+            logger.info("financialStatement fetched successfully.");
+            return financialStatement;
+        }
+    }
+
+    public Results formatAndSaveData(JsonNode stockData, String searchId, String resultDate) {
 
         Results results = new Results();
 
@@ -192,6 +200,7 @@ public class StockUtility {
             logger.error("{} Stock term is not found in all_stocks table", searchId);
         }
 
+        JsonNode financialData = stockData.path("financialStatement");
         JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
         JsonNode quarterlyProfit = financialData.get(1).get("quarterly");
         JsonNode yearlyRevenue = financialData.get(0).get("yearly");
@@ -204,6 +213,11 @@ public class StockUtility {
         double yearlyProfitCngPrcnt = getPercentageChange(yearlyProfit);
         double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
         String latestQuarter = getLatestQuarter(quarterlyRevenue);
+
+        JsonNode stastData = stockData.path("stats");
+        JsonNode marketCap = stastData.get("marketCap");
+        JsonNode peRatio = stastData.get("peRatio");
+        JsonNode industryPe = stastData.get("industryPe");
 
         if(!searchedStockDtos.isEmpty()){
             SearchedStockDto searchedStockDto = searchedStockDtos.get(0);
@@ -231,6 +245,10 @@ public class StockUtility {
         results.setYearlyNetworthCngPrcnt(yearlyNetworthCngPrcnt);
         results.setResultDate(Date.valueOf(resultDate));
         results.setLatestQuarter(latestQuarter);
+        results.setMarketCap(marketCap != null ? marketCap.asInt() : 0);
+        results.setPeRatio(peRatio != null ? Math.round(peRatio.asDouble() * 100.0) / 100.0 : 0.0);
+        results.setIndustryPe(industryPe != null ? Math.round(industryPe.asDouble() * 100.0) / 100.0 : 0.0);
+
         return results;
     }
 
