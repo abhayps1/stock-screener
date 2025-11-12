@@ -5,13 +5,15 @@ public class SearchedStockDto {
     public String symbol;
     public String name;
     public String endpoint;
+    public boolean isNse;
 
     // Constructors, getters, and setters can be added as needed
-    public SearchedStockDto(String securityCode, String symbol, String name, String endpoint) {
+    public SearchedStockDto(String securityCode, String symbol, String name, String endpoint, boolean isNse) {
         this.securityCode = securityCode;
         this.symbol = symbol;
         this.name = name;
         this.endpoint = endpoint;
+        this.isNse = isNse;
     }
 
     public String getSecurityCode() {
@@ -44,6 +46,14 @@ public class SearchedStockDto {
 
     public void setEndpoint(String endpoint) {
         this.endpoint = endpoint;
+    }
+
+    public boolean getIsNse() {
+        return isNse;
+    }
+
+    public void setIsNse(boolean isNse) {
+        this.isNse = isNse;
     }
 
     public String toString() {

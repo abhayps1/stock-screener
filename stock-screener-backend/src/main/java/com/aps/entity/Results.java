@@ -30,13 +30,12 @@ public class Results {
     private double yearlyNetworthCngPrcnt;
 
     private String growwUrl;
-
 	private String screenerUrl;
-
 	private String trendlyneUrl;
+    private String perplexityUrl;
 
     private int marketCap;
     private double peRatio;
     private double industryPe;
-    
+
 }

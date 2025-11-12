@@ -13,4 +13,5 @@ export interface ResultModel {
   growwUrl: string;
   screenerUrl: string;
   trendlyneUrl: string;
+  perplexityUrl: string;
 }

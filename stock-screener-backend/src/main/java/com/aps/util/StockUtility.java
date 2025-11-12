@@ -34,8 +34,6 @@ public class StockUtility {
     @Autowired
     private SearchingRepository searchingRepository;
 
-    
-
     public String mapToString(HashMap<String, String> indicators) {
         String indicatorString = null;
         if (indicators.containsKey("error")) {
@@ -219,21 +217,23 @@ public class StockUtility {
         JsonNode peRatio = stastData.get("peRatio");
         JsonNode industryPe = stastData.get("industryPe");
 
-        if(!searchedStockDtos.isEmpty()){
+        if (!searchedStockDtos.isEmpty()) {
             SearchedStockDto searchedStockDto = searchedStockDtos.get(0);
             String symbol = searchedStockDto.getSymbol();
             String securityCode = searchedStockDto.getSecurityCode();
             String name = searchedStockDto.getName();
-            List<String> urls = createUrls(symbol, securityCode, searchId);
+            boolean isNse = searchedStockDto.isNse;
+            List<String> urls = createUrls(symbol, securityCode, searchId, isNse);
             String growwUrl = urls.get(0);
             String screenerUrl = urls.get(1);
             String trendlyneUrl = urls.get(2);
+            String perplexityUrl = urls.get(3);
             results.setStockName(name);
             results.setGrowwUrl(growwUrl);
             results.setScreenerUrl(screenerUrl);
             results.setTrendlyneUrl(trendlyneUrl);
-        }
-        else{
+            results.setPerplexityUrl(perplexityUrl);
+        } else {
             results.setStockName(searchId);
             results.setGrowwUrl("https://groww.in/stocks/" + searchId);
         }
@@ -287,14 +287,20 @@ public class StockUtility {
         return latestQuarter;
     }
 
-    public List<String> createUrls(String symbol, String securityCode, String endpoint) {
+    public List<String> createUrls(String symbol, String securityCode, String endpoint, boolean isNse) {
         List<String> urls = new ArrayList<>();
         urls.add("https://groww.in/stocks/" + endpoint);
         if (null != securityCode)
             urls.add("https://www.screener.in/company/" + securityCode + "/consolidated");
         else
             urls.add("https://www.screener.in/company/" + symbol + "/consolidated");
+
         urls.add("https://trendlyne.com/equity/" + symbol + '/' + endpoint);
+        if (isNse) {
+            urls.add("https://www.perplexity.ai/finance/" + symbol + ".NS");
+        } else {
+            urls.add("https://www.perplexity.ai/finance/" + symbol + ".BO");
+        }
 
         return urls;
     }
@@ -305,12 +311,12 @@ public class StockUtility {
         }
         // Element container = lazyLoadData.selectFirst(".technicals-chart-container");
         // if (container != null) {
-        //     String data = container.attr("data-chart-options");
-        //     if (data != null && !data.isEmpty()) {
-        //         // Unescape HTML entities
-        //         data = data.replace(""", "\"");
-        //         return data;
-        //     }
+        // String data = container.attr("data-chart-options");
+        // if (data != null && !data.isEmpty()) {
+        // // Unescape HTML entities
+        // data = data.replace(""", "\"");
+        // return data;
+        // }
         // }
         return null;
     }

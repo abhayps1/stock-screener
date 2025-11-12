@@ -152,6 +152,9 @@ def update_all_stocks_data():
     bse_df = bse_df[bse_df['Status'] == 'Active']
     nse_df = nse_df[nse_df[' SERIES'].isin(['EQ', 'BE'])]
 
+    print("The size of the nse dataframe is : "+str(len(nse_df)))
+    print("The size of the bse dataframe is : "+str(len(bse_df)))
+
     # Identify common ISIN numbers in both DataFrames
     common_isin = set(bse_df['ISIN_NUMBER']) & set(nse_df[' ISIN NUMBER'])
 
@@ -182,6 +185,7 @@ def update_all_stocks_data():
         ' ISIN NUMBER': 'isin'
     })[['symbol', 'name', 'listing_date', 'isin', 'endpoint']]
 
+    
     # Add missing columns with NaN or appropriate default values
     mapped_nse_df['security_code'] = np.nan
     mapped_nse_df['industry'] = np.nan
@@ -199,6 +203,9 @@ def update_all_stocks_data():
 
     # Convert listing_date to date format (DD-MMM-YYYY) without time
     all_stocks_df['listing_date'] = pd.to_datetime(all_stocks_df['listing_date'], format='%d-%b-%Y', errors='coerce').dt.date
+
+    # Add 'is_nse' column: True if stock belongs to nse_df, False otherwise
+    all_stocks_df['is_nse'] = all_stocks_df['isin'].isin(set(nse_df[' ISIN NUMBER']))
 
     # Save the updated all_stocks_df to database
     engine = sqlalchemy.create_engine('mysql+pymysql://root:root@localhost:3306/stockscreenerdb')

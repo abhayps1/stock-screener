@@ -3,4 +3,5 @@ export interface SearchedStockModel {
   symbol: string;
   name: string;
   endpoint: string;
+  isNse: boolean;
 }

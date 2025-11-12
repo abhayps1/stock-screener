@@ -18,7 +18,7 @@ public class SearchingRepository {
 
     public List<SearchedStockDto> searchStock(String term) {
         String sql = """
-            SELECT security_code, symbol, name, endpoint 
+            SELECT security_code, symbol, name, endpoint, is_nse
             FROM all_stocks
             WHERE LOWER(security_code) LIKE LOWER(CONCAT('%', ?, '%'))
                OR LOWER(symbol) LIKE LOWER(CONCAT('%', ?, '%'))
@@ -32,14 +32,15 @@ public class SearchingRepository {
                 rs.getString("security_code"),
                 rs.getString("symbol"),
                 rs.getString("name"),
-                rs.getString("endpoint")
+                rs.getString("endpoint"),
+                rs.getBoolean("is_nse")
             )
         );
     }
 
     public List<SearchedStockDto> searchStockUsingEndpoint(String endpoint) {
         String sql = """
-            SELECT security_code, symbol, name, endpoint
+            SELECT security_code, symbol, name, endpoint, is_nse
             FROM all_stocks
             WHERE endpoint LIKE LOWER(CONCAT('%', ?, '%'))
         """;
@@ -51,7 +52,8 @@ public class SearchingRepository {
                 rs.getString("security_code"),
                 rs.getString("symbol"),
                 rs.getString("name"),
-                rs.getString("endpoint")
+                rs.getString("endpoint"), 
+                rs.getBoolean("is_nse")
             )
         );
     }

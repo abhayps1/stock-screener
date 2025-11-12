@@ -44,6 +44,9 @@
             <a *ngIf="result.trendlyneUrl" [href]="result.trendlyneUrl" rel="noopener noreferrer" title="Trendlyne">
               <img src="trndlyne.svg" alt="Trendlyne" width="24" height="24" />
             </a>
+            <a *ngIf="result.perplexityUrl" [href]="result.perplexityUrl" rel="noopener noreferrer" title="Perplexity">
+              <img src="perplexity.svg" alt="Perplexity" width="24" height="24" />
+            </a>
           </td>
           <td [style.color]="result.quarterlyRevenueCngPrcnt <= 0 ? 'red' : 'green'"
             [style.font-weight]="result.quarterlyRevenueCngPrcnt > 0 ? 'bold' : 'normal'">{{

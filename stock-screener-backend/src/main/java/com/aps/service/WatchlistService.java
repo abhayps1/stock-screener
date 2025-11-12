@@ -7,7 +7,6 @@ import com.aps.entity.Watchlist;
 import com.aps.repository.WatchlistRepository;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class WatchlistService {

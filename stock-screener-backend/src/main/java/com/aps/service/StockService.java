@@ -65,8 +65,8 @@ public class StockService {
         String symbol = searchedStockDto.getSymbol();
         String name = searchedStockDto.getName();
         String endpoint = searchedStockDto.getEndpoint();
-
-        List<String> urls = stockUtility.createUrls(symbol.toLowerCase(), securityCode, endpoint);
+        boolean isNse = searchedStockDto.getIsNse();
+        List<String> urls = stockUtility.createUrls(symbol.toLowerCase(), securityCode, endpoint, isNse);
         String growwUrl = urls.get(0);
         String screenerUrl = urls.get(1);
         String trendlyneUrl = urls.get(2);
@@ -107,9 +107,13 @@ public class StockService {
 
     public String fetchResults() {
         try {
-            OkHttpClient client = new OkHttpClient();
+            OkHttpClient client = new OkHttpClient.Builder()
+                    .connectTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .readTimeout(60, java.util.concurrent.TimeUnit.SECONDS)
+                    .writeTimeout(30, java.util.concurrent.TimeUnit.SECONDS)
+                    .build();
 
-            String dateFrom = LocalDate.now().minusDays(2).format(DateTimeFormatter.ISO_LOCAL_DATE);
+            String dateFrom = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
             String dateTo = LocalDate.now().minusDays(1).format(DateTimeFormatter.ISO_LOCAL_DATE);
 
             String url = "https://groww.in/v1/api/stocks_data/equity_feature/v2/corporate_action/event?from="
