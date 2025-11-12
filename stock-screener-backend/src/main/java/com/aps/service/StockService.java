@@ -144,10 +144,11 @@ public class StockService {
                             continue;
                         }
                         JsonNode financialData = stockUtility.getStockFinancialStatement(stockData);
-                        if (financialData == null) {
+                        JsonNode stastData = stockData.path("stats");
+                        if (financialData == null || (stastData.get("marketCap") != null && stastData.get("marketCap").asInt() < 500)) {
                             continue;
                         }
-                        Results result = stockUtility.formatAndSaveData(stockData, searchId, resultDate);
+                        Results result = stockUtility.formatAndSaveData(financialData, stastData, searchId, resultDate);
                         if (result != null)
                             resultsRepository.save(result);
                     }

@@ -189,7 +189,7 @@ public class StockUtility {
         }
     }
 
-    public Results formatAndSaveData(JsonNode stockData, String searchId, String resultDate) {
+    public Results formatAndSaveData(JsonNode financialData, JsonNode stastData,  String searchId, String resultDate) {
 
         Results results = new Results();
 
@@ -198,7 +198,6 @@ public class StockUtility {
             logger.error("{} Stock term is not found in all_stocks table", searchId);
         }
 
-        JsonNode financialData = stockData.path("financialStatement");
         JsonNode quarterlyRevenue = financialData.get(0).get("quarterly");
         JsonNode quarterlyProfit = financialData.get(1).get("quarterly");
         JsonNode yearlyRevenue = financialData.get(0).get("yearly");
@@ -212,7 +211,6 @@ public class StockUtility {
         double yearlyNetworthCngPrcnt = getPercentageChange(yearlyNetworth);
         String latestQuarter = getLatestQuarter(quarterlyRevenue);
 
-        JsonNode stastData = stockData.path("stats");
         JsonNode marketCap = stastData.get("marketCap");
         JsonNode peRatio = stastData.get("peRatio");
         JsonNode industryPe = stastData.get("industryPe");
