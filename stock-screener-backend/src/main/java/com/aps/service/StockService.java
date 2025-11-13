@@ -143,11 +143,14 @@ public class StockService {
                         if (stockData == null) {
                             continue;
                         }
-                        JsonNode financialData = stockUtility.getStockFinancialStatement(stockData);
                         JsonNode stastData = stockData.path("stats");
-                        if (financialData == null || (stastData.get("marketCap") != null && stastData.get("marketCap").asInt() < 500)) {
+                        if (stastData.isEmpty() || stastData.isNull()) {
                             continue;
                         }
+                        if(stastData.path("marketCap").isMissingNode() || stastData.path("marketCap").asDouble() < 500){
+                            continue;
+                        }
+                        JsonNode financialData = stockUtility.getStockFinancialStatement(stockData);
                         Results result = stockUtility.formatAndSaveData(financialData, stastData, searchId, resultDate);
                         if (result != null)
                             resultsRepository.save(result);
