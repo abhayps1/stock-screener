@@ -151,6 +151,9 @@ public class StockService {
                             continue;
                         }
                         JsonNode financialData = stockUtility.getStockFinancialStatement(stockData);
+                        if(financialData == null || financialData.isEmpty() || financialData.isNull()){
+                            continue;
+                        }
                         Results result = stockUtility.formatAndSaveData(financialData, stastData, searchId, resultDate);
                         if (result != null)
                             resultsRepository.save(result);
