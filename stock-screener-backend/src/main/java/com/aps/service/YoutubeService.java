@@ -37,9 +37,9 @@ public class YoutubeService {
     @Autowired
     private YoutubeVideoRepository youtubeVideoRepository;
 
-    private String youtube_api_key = "";
+    private String youtube_api_key = "AIzaSyAk-1LHcADRQPqmmwGOxgUxknxWpjm0s9A";
 
-    public YoutubeChannel getChannelId(String handle) {
+    public YoutubeChannel fetchChannelId(String handle) {
         try {
             TrustManager[] trustAllCerts = new TrustManager[] {
                     new X509TrustManager() {
@@ -105,7 +105,7 @@ public class YoutubeService {
         }
     }
 
-    public List<YoutubeVideo> getVideosByChannelId(String channelId) {
+    public List<YoutubeVideo> fetchVideosByChannelId(String channelId) {
         try {
             // ➤ Fetch the channel entity (required for relationship)
             YoutubeChannel channel = youtubeChannelRepository.findById(channelId)
@@ -173,6 +173,10 @@ public class YoutubeService {
             e.printStackTrace();
             return new ArrayList<>();
         }
+    }
+
+    public List<YoutubeVideo> getChannelVideos(String channelId) {
+        return youtubeVideoRepository.findByChannel_ChannelId(channelId);
     }
 
 }
