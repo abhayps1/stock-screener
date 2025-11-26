@@ -1,5 +1,7 @@
 package com.aps.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -21,6 +23,7 @@ public class YoutubeVideo {
 
     @ManyToOne
     @JoinColumn(name = "channel_id")
+    @JsonIgnore 
     private YoutubeChannel channel;   // FK to YoutubeChannel
 }
 

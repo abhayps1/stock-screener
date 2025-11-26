@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 @AllArgsConstructor
 @Data
 @Entity
@@ -24,5 +26,6 @@ public class YoutubeChannel {
     private String title;
 
     @OneToMany(mappedBy = "channel", cascade = CascadeType.ALL)
+    @JsonIgnore
     private List<YoutubeVideo> videos = new ArrayList<>();
 }
