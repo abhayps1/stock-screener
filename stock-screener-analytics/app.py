@@ -3,8 +3,6 @@ from flask import Flask, request, jsonify
 import os
 from dotenv import load_dotenv
 from app_utility import update_all_stocks_data
-from bokeh.plotting import figure
-from bokeh.embed import components
 from flask_cors import CORS
 import requests
 from app_utility import get_financial_data_for_stock
